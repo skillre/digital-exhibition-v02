@@ -98,22 +98,51 @@ async function init() {
   pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
   pipeline.imageProcessing.vignetteStretch = 0.5;
 
-  // ── 阴影（从海报区主灯投射）──
-  const posterSpot = scene.getLightByName('poster-spot-0');
-  if (posterSpot) {
-    const shadowGen = new BABYLON.ShadowGenerator(1024, posterSpot);
-    shadowGen.usePercentageCloserFiltering = true;
-    shadowGen.filteringQuality = BABYLON.ShadowGenerator.QUALITY_MEDIUM;
-    shadowGen.darkness = 0.55;  // 阴影更深 → 更强的空间感
-    // 让展板投射阴影
+  // ── 锐化（通过 DefaultRenderingPipeline 内置）──
+  if (pipeline.sharpenEnabled !== undefined) {
+    pipeline.sharpenEnabled = true;
+    pipeline.sharpen.edgeAmount = 0.3;
+    pipeline.sharpen.colorAmount = 1.0;
+  }
+
+  // ── SSAO2（屏幕空间环境光遮蔽 → 接触阴影）──
+  const ssao = new BABYLON.SSAO2RenderingPipeline('ssao', scene, { ssaoRatio: 0.5, blurRatio: 0.5 });
+  ssao.radius = 2.5;
+  ssao.totalStrength = 1.2;
+  ssao.base = 0.1;
+  ssao.samples = 16;
+  ssao.maxZ = 100;
+  ssao.minZAspect = 0.5;
+  scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', cameraCtrl.camera);
+
+  // ── 多光源阴影 ──
+  const floor = scene.getMeshByName('floor');
+  const shadowLights = ['poster-spot-0', 'poster-spot-1', 'poster-spot-2'];
+  for (const lightName of shadowLights) {
+    const light = scene.getLightByName(lightName);
+    if (!light) continue;
+    const sg = new BABYLON.ShadowGenerator(512, light);
+    sg.usePercentageCloserFiltering = true;
+    sg.filteringQuality = BABYLON.ShadowGenerator.QUALITY_LOW;
+    sg.darkness = 0.5;
     scene.meshes.forEach(m => {
-      if (m.name.includes('poster-board') || m.name.includes('poster-lightbar')) {
-        shadowGen.addShadowCaster(m);
+      if (m.name.includes('poster-board') || m.name.includes('poster-lightbar') || m.name.includes('showcase-') || m.name.includes('col-')) {
+        sg.addShadowCaster(m);
       }
     });
-    // 地板接收阴影
-    const floor = scene.getMeshByName('floor');
-    if (floor) floor.receiveShadows = true;
+  }
+  if (floor) floor.receiveShadows = true;
+
+  // ── 地板平面反射（MirrorTexture）──
+  if (floor) {
+    const mirror = new BABYLON.MirrorTexture('floor-mirror', 512, scene, true);
+    mirror.mirrorPlane = new BABYLON.Plane(0, -1, 0, 0);
+    mirror.renderList = scene.meshes.filter(m =>
+      m.name.includes('col-') || m.name.includes('showcase-') || m.name.includes('poster-board') || m.name.includes('holo') || m.name.includes('hbase') || m.name.includes('hp')
+    );
+    mirror.level = 0.15; // 反射强度（0=无，1=全反射）
+    mirror.adaptiveBlurKernel = 32;
+    floor.material.reflectionTexture = mirror;
   }
 
   tracker.setProgress(75, '正在加载展品内容...');
