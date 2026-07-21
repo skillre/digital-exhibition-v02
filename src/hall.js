@@ -225,41 +225,83 @@ export function createHall(scene) {
     b.material = bannerBorderMat;
   });
 
-  // ── 中央：文档展柜（5 个，一字排开）──
-  const showcaseW = 1.2, showcaseH = 1.0, showcaseD = 0.9;
-  const showcaseGap = 2.5;
-  const showcases = [];
-  for (let i = 0; i < 5; i++) {
-    const sc = BABYLON.MeshBuilder.CreateBox(`showcase-${i}`, {
-      width: showcaseW, height: showcaseH, depth: showcaseD
-    }, scene);
-    sc.position = new BABYLON.Vector3(
-      -showcaseGap * 2 + i * showcaseGap,
-      showcaseH / 2,
-      -1.5
-    );
-    const mat = new BABYLON.PBRMaterial(`showcase-pbr-${i}`, scene);
-    mat.albedoColor = new BABYLON.Color3(0.72, 0.75, 0.82);
-    mat.metallic = 0.3;
-    mat.roughness = 0.3;
-    mat.environmentIntensity = 0.7;
-    sc.material = mat;
-    sc.isPickable = true;
-    showcases.push(sc);
-    hallMeshes.push(sc);
+  // ── 中央：全息投影屏（3 个）──
+  const holoW = 1.5, holoH = 1.0;
+  const holoGap = 3.0;
+  const holoScreens = [];
+  for (let i = 0; i < 3; i++) {
+    const x = -holoGap + i * holoGap;
+    const z = 2;
 
-    // 展柜顶部发光面板
-    const top = BABYLON.MeshBuilder.CreatePlane(`showcase-top-${i}`, {
-      width: showcaseW - 0.2, height: showcaseD - 0.2
+    // 全息屏（半透明发光平面）
+    const hs = BABYLON.MeshBuilder.CreatePlane(`holo-screen-${i}`, {
+      width: holoW, height: holoH
     }, scene);
-    top.position = new BABYLON.Vector3(0, showcaseH / 2 + 0.01, 0);
-    top.rotation.x = -Math.PI / 2;
-    top.parent = sc;
-    const topMat = new BABYLON.StandardMaterial(`showcase-top-mat-${i}`, scene);
-    topMat.diffuseColor = new BABYLON.Color3(0.3, 0.45, 0.7);
-    topMat.emissiveColor = new BABYLON.Color3(0.15, 0.28, 0.55);
-    top.material = topMat;
+    hs.position = new BABYLON.Vector3(x, 1.5, z);
+    const holoMat = new BABYLON.StandardMaterial(`holo-mat-${i}`, scene);
+    holoMat.diffuseColor = new BABYLON.Color3(0, 0.35, 0.7);
+    holoMat.emissiveColor = new BABYLON.Color3(0, 0.45, 0.85);
+    holoMat.alpha = 0.65;
+    holoMat.backFaceCulling = false;
+    hs.material = holoMat;
+    hs.isPickable = true;
+
+    // 全息屏边框（细金属框）
+    const frameMat = createMetalMaterial(scene, `holo-frame-${i}`, new BABYLON.Color3(0.4, 0.45, 0.55));
+    const fw = 0.04;
+    [
+      { w: holoW+fw*2, h: fw, x: 0, y: holoH/2+fw/2 },
+      { w: holoW+fw*2, h: fw, x: 0, y: -(holoH/2+fw/2) },
+      { w: fw, h: holoH, x: -(holoW/2+fw/2), y: 0 },
+      { w: fw, h: holoH, x: holoW/2+fw/2, y: 0 },
+    ].forEach((s, j) => {
+      const f = BABYLON.MeshBuilder.CreatePlane(`holo-frame-${i}-${j}`, { width: s.w, height: s.h }, scene);
+      f.position = new BABYLON.Vector3(s.x, s.y, -0.005);
+      f.parent = hs;
+      f.material = frameMat;
+    });
+
+    // 角落发光节点（4个）
+    const nodeMat = new BABYLON.StandardMaterial(`holo-node-${i}`, scene);
+    nodeMat.emissiveColor = new BABYLON.Color3(0, 0.7, 1.0);
+    [[-holoW/2, holoH/2], [holoW/2, holoH/2], [-holoW/2, -holoH/2], [holoW/2, -holoH/2]].forEach(([dx, dy], ni) => {
+      const node = BABYLON.MeshBuilder.CreateSphere(`holo-node-${i}-${ni}`, { diameter: 0.06, segments: 8 }, scene);
+      node.position = new BABYLON.Vector3(dx, dy, -0.01);
+      node.parent = hs;
+      node.material = nodeMat;
+    });
+
+    // 底座发光圆盘
+    const base = BABYLON.MeshBuilder.CreateCylinder(`holo-base-${i}`, {
+      diameter: 1.0, height: 0.04, tessellation: 24
+    }, scene);
+    base.position = new BABYLON.Vector3(x, 0.02, z);
+    const baseMat = new BABYLON.StandardMaterial(`holo-base-mat-${i}`, scene);
+    baseMat.diffuseColor = new BABYLON.Color3(0.1, 0.2, 0.35);
+    baseMat.emissiveColor = new BABYLON.Color3(0, 0.35, 0.7);
+    base.material = baseMat;
+
+    // 底座外环发光
+    const ring = BABYLON.MeshBuilder.CreateTorus(`holo-ring-${i}`, {
+      diameter: 1.1, thickness: 0.04, tessellation: 32
+    }, scene);
+    ring.position = new BABYLON.Vector3(x, 0.01, z);
+    const ringMat = new BABYLON.StandardMaterial(`holo-ring-mat-${i}`, scene);
+    ringMat.emissiveColor = new BABYLON.Color3(0, 0.6, 1.0);
+    ring.material = ringMat;
+
+    holoScreens.push({ screen: hs, base, ring });
+    hallMeshes.push(hs, base, ring);
   }
+
+  // 全息屏浮动动画
+  scene.onBeforeRenderObservable.add(() => {
+    const t = Date.now() * 0.001;
+    holoScreens.forEach((h, i) => {
+      h.screen.position.y = 1.5 + Math.sin(t + i * 2) * 0.04;
+      h.ring.rotation.y += 0.003;
+    });
+  });
 
   // ── 虚拟展区信息（用于 UI 和拾取）──
   zones.set('poster-zone', {
@@ -278,10 +320,10 @@ export function createHall(scene) {
   });
   zones.set('doc-zone', {
     id: 'doc-zone', label: '文档资料库',
-    center: new BABYLON.Vector3(0, 0, -1.5),
+    center: new BABYLON.Vector3(0, 0, 2),
     size: { width: 10, depth: 4 },
-    showcases,
-    entry: new BABYLON.Vector3(0, 1.7, -4),
+    holoScreens: holoScreens.map(h => h.screen),
+    entry: new BABYLON.Vector3(0, 1.7, 0),
   });
   zones.set('entrance', {
     id: 'entrance', label: '入口',
@@ -296,7 +338,7 @@ export function createHall(scene) {
   boards.forEach(b => b.isPickable = true);
   screen.isPickable = true;
   subScreen.isPickable = true;
-  showcases.forEach(s => s.isPickable = true);
+  holoScreens.forEach(h => h.screen.isPickable = true);
 
   return { zones, hallMeshes };
 }

@@ -28,8 +28,8 @@ async function init() {
   tracker.setProgress(30, '正在创建场景...');
 
   const scene = new BABYLON.Scene(engine);
-  scene.clearColor = new BABYLON.Color4(0.75, 0.78, 0.82, 1);  // 中性灰背景
-  scene.ambientColor = new BABYLON.Color3(0.3, 0.3, 0.32);
+  scene.clearColor = new BABYLON.Color4(0.10, 0.12, 0.16, 1);  // 深色背景匹配暗墙
+  scene.ambientColor = new BABYLON.Color3(0.15, 0.15, 0.18);
 
   // ── 环境贴图（PBR 反射的核心）──
   const envTexture = BABYLON.CubeTexture.CreateFromPrefilteredData('lib/environment.env', scene);
@@ -138,7 +138,7 @@ async function init() {
     const mirror = new BABYLON.MirrorTexture('floor-mirror', 512, scene, true);
     mirror.mirrorPlane = new BABYLON.Plane(0, -1, 0, 0);
     mirror.renderList = scene.meshes.filter(m =>
-      m.name.includes('col-') || m.name.includes('showcase-') || m.name.includes('poster-board') || m.name.includes('holo') || m.name.includes('hbase') || m.name.includes('hp')
+      m.name.includes('col-') || m.name.includes('poster-board') || m.name.includes('holo-screen') || m.name.includes('holo-base') || m.name.includes('hp') || m.name.includes('icon-')
     );
     mirror.level = 0.15; // 反射强度（0=无，1=全反射）
     mirror.adaptiveBlurKernel = 32;

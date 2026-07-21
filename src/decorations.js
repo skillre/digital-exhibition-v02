@@ -6,15 +6,15 @@ export function addDecorations(scene, hallInfo) {
 
   // ── 材质 ──
   const colMat = new BABYLON.PBRMaterial('col-pbr', scene);
-  colMat.albedoColor = new BABYLON.Color3(0.78, 0.80, 0.84);
-  colMat.metallic = 0.3; colMat.roughness = 0.28; colMat.environmentIntensity = 0.8;
+  colMat.albedoColor = new BABYLON.Color3(0.35, 0.38, 0.48);
+  colMat.metallic = 0.4; colMat.roughness = 0.25; colMat.environmentIntensity = 0.7;
 
   const accentMat = new BABYLON.StandardMaterial('accent', scene);
   accentMat.diffuseColor = new BABYLON.Color3(0, 0.5, 1.0);
   accentMat.emissiveColor = new BABYLON.Color3(0, 0.5, 1.0);
 
   const lightBarMat = new BABYLON.PBRMaterial('lightbar-pbr', scene);
-  lightBarMat.albedoColor = new BABYLON.Color3(0.78, 0.80, 0.84);
+  lightBarMat.albedoColor = new BABYLON.Color3(0.45, 0.48, 0.58);
   lightBarMat.metallic = 0.5; lightBarMat.roughness = 0.3;
 
   // ═══════════════════════════════════════
@@ -210,23 +210,6 @@ export function addDecorations(scene, hallInfo) {
       const bar = BABYLON.MeshBuilder.CreateBox('plb', { width: 1.6, height: 0.06, depth: 0.15 }, scene);
       bar.position = new BABYLON.Vector3(board.position.x, board.position.y + 0.7, board.position.z - 0.1);
       bar.material = lightBarMat; meshes.push(bar);
-    }
-  }
-
-  // ═══════════════════════════════════════
-  // 10. 展柜台灯
-  // ═══════════════════════════════════════
-  const lampMat = new BABYLON.StandardMaterial('lamp', scene);
-  lampMat.diffuseColor = new BABYLON.Color3(0.9, 0.85, 0.7); lampMat.emissiveColor = new BABYLON.Color3(0.5, 0.45, 0.35);
-  if (hallInfo.zones.get('doc-zone')?.showcases) {
-    for (const sc of hallInfo.zones.get('doc-zone').showcases) {
-      const shade = BABYLON.MeshBuilder.CreateCylinder('ls', { diameterTop: 0.12, diameterBottom: 0.3, height: 0.18, tessellation: 12 }, scene);
-      shade.position = new BABYLON.Vector3(sc.position.x, sc.getBoundingInfo().boundingBox.maximumWorld.y + 0.55, sc.position.z);
-      shade.material = lampMat;
-      const pole = BABYLON.MeshBuilder.CreateCylinder('lp', { diameter: 0.03, height: 0.45, tessellation: 8 }, scene);
-      pole.position = new BABYLON.Vector3(sc.position.x, sc.getBoundingInfo().boundingBox.maximumWorld.y + 0.28, sc.position.z);
-      pole.material = lightBarMat;
-      meshes.push(shade, pole);
     }
   }
 

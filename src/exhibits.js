@@ -81,23 +81,34 @@ export async function createExhibits(scene, content, hallInfo) {
     }
   }
 
-  // ── 文档展品 ──
+  // ── 文档展品（全息屏）──
   const docZone = content.getZone('doc-zone');
   if (docZone && docZone.items) {
     const zone = hallInfo.zones.get('doc-zone');
-    if (zone && zone.showcases) {
-      for (let i = 0; i < docZone.items.length && i < zone.showcases.length; i++) {
+    if (zone && zone.holoScreens) {
+      for (let i = 0; i < docZone.items.length && i < zone.holoScreens.length; i++) {
         const item = docZone.items[i];
-        const showcase = zone.showcases[i];
+        const screen = zone.holoScreens[i];
 
-        // 设置拾取元数据
-        showcase.isPickable = true;
-        showcase.metadata = { type: 'document', item };
+        // 将文档内容作为纹理贴到全息屏上
+        try {
+          const tex = new BABYLON.Texture(item.src, scene, false, false, undefined, () => {
+            const mat = screen.material.clone(`holo-doc-mat-${item.id}`);
+            mat.diffuseTexture = tex;
+            mat.emissiveColor = new BABYLON.Color3(0.15, 0.35, 0.65);
+            screen.material = mat;
+          });
+        } catch (e) {
+          console.warn(`文档纹理加载失败: ${item.id}`, e.message);
+        }
+
+        screen.isPickable = true;
+        screen.metadata = { type: 'document', item };
 
         docExhibits.push({
           id: item.id,
           type: 'document',
-          mesh: showcase,
+          mesh: screen,
           zone: 'doc-zone',
           data: item,
         });
