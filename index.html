@@ -35,9 +35,27 @@
     </div>
   </div>
 
+  <!-- 十字准星 -->
+  <div id="crosshair" class="crosshair" style="display:none;">
+    <div class="crosshair-h"></div>
+    <div class="crosshair-v"></div>
+    <div class="crosshair-dot"></div>
+  </div>
+  <!-- 准星提示文字 -->
+  <div id="crosshair-hint" class="crosshair-hint" style="display:none;"></div>
+
   <!-- Pointer Lock 提示 -->
   <div id="pointer-hint" class="pointer-hint" style="display:none;">
-    点击画面进入自由视角 · 按 ESC 退出
+    点击画面进入自由视角 · WASD 移动 · 鼠标转向 · Q 退出
+  </div>
+
+  <!-- 详情面板容器 -->
+  <div id="detail-panel" class="detail-panel" style="display:none;">
+    <div class="detail-overlay"></div>
+    <div class="detail-content">
+      <button class="detail-close" id="detail-close">✕</button>
+      <div id="detail-body"></div>
+    </div>
   </div>
 
   <!-- 展区跳转菜单（由 JS 动态填充） -->

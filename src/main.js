@@ -164,30 +164,10 @@ async function init() {
 
   // ── Phase 5: UI 系统 + 视频播放器 + 拾取 ──
   const { setupUI } = await import('./ui.js');
-  const { createVideoPlayer } = await import('./video-player.js');
   const ui = setupUI(content, exhibits, cameraCtrl);
 
-  // 为每个视频展品创建播放器并绑定到屏幕
-  if (exhibits && exhibits.videoExhibits) {
-    for (const ve of exhibits.videoExhibits) {
-      const player = createVideoPlayer(scene, ve.mesh, ve.data.src, ve.data.poster);
-      // 更新 metadata.toggle 为实际的播放/暂停函数
-      ve.mesh.metadata.toggle = player.togglePlayback;
-    }
-  }
-
-  // 设置拾取系统（点击展品交互）
-  scene.onPointerDown = (evt, pickResult) => {
-    if (!pickResult.hit || !pickResult.pickedMesh || !pickResult.pickedMesh.metadata) return;
-    const meta = pickResult.pickedMesh.metadata;
-    if (meta.type === 'poster') {
-      ui.showPosterPanel(meta.item);
-    } else if (meta.type === 'video' && meta.toggle) {
-      meta.toggle();
-    } else if (meta.type === 'document') {
-      ui.showDocPanel(meta.item);
-    }
-  };
+  // 设置焦点交互系统（十字准星 + 高亮 + 详情面板）
+  ui.setupCrosshair(scene);
 
   // ── Phase 6: 导航菜单 ──
   ui.createNavMenu(hallInfo);
