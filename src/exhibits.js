@@ -26,20 +26,24 @@ export async function createExhibits(scene, content, hallInfo) {
         const board = zone.boards[i];
 
         try {
-          // 加载海报纹理并替换展板材质
+          console.log(`[海报] 加载中: ${item.id} → ${item.image}`);
           const tex = await loadTexture(item.image, scene);
           const mat = new BABYLON.PBRMaterial(`poster-pbr-${item.id}`, scene);
           mat.albedoTexture = tex;
           mat.metallic = 0;
-          mat.roughness = 0.5;
-          mat.emissiveColor = new BABYLON.Color3(0.25, 0.25, 0.30);
-          mat.environmentIntensity = 0.4;
+          mat.roughness = 0.45;
+          mat.emissiveColor = new BABYLON.Color3(0.35, 0.35, 0.40);  // 更亮确保暗环境可见
+          mat.environmentIntensity = 0.5;
           board.material = mat;
-
-          // 添加发光边框
-          createGlowBorder(scene, board, new BABYLON.Color3(0, 0.47, 1.0));
+          createGlowBorder(scene, board, new BABYLON.Color3(0, 0.5, 1.0));
+          console.log(`[海报] 加载成功: ${item.id}`);
         } catch (e) {
-          console.warn(`海报加载失败: ${item.id}`, e.message);
+          console.error(`[海报] 加载失败: ${item.id}`, e.message);
+          // 失败时显示红色边框提示
+          const errMat = new BABYLON.StandardMaterial(`poster-err-${item.id}`, scene);
+          errMat.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.2);
+          errMat.emissiveColor = new BABYLON.Color3(0.5, 0.1, 0.1);
+          board.material = errMat;
         }
 
         // 设置拾取元数据
@@ -92,14 +96,18 @@ export async function createExhibits(scene, content, hallInfo) {
 
         // 将文档内容作为纹理贴到全息屏上
         try {
+          console.log(`[文档] 加载中: ${item.id} → ${item.src}`);
           const tex = new BABYLON.Texture(item.src, scene, false, true, undefined, () => {
             const mat = screen.material.clone(`holo-doc-mat-${item.id}`);
             mat.diffuseTexture = tex;
-            mat.emissiveColor = new BABYLON.Color3(0.05, 0.15, 0.30);
+            mat.emissiveColor = new BABYLON.Color3(0.08, 0.20, 0.35);
             screen.material = mat;
+            console.log(`[文档] 加载成功: ${item.id}`);
+          }, (_, err) => {
+            console.error(`[文档] 加载失败: ${item.id}`, err);
           });
         } catch (e) {
-          console.warn(`文档纹理加载失败: ${item.id}`, e.message);
+          console.error(`[文档] 加载异常: ${item.id}`, e.message);
         }
 
         screen.isPickable = true;

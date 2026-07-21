@@ -22,9 +22,13 @@ export function createVideoPlayer(scene, screenMesh, videoSrc, posterSrc) {
 
   // 尝试加载封面图
   if (posterSrc) {
+    console.log(`[视频封面] 加载中: ${posterSrc}`);
     const posterTex = new BABYLON.Texture(posterSrc, scene, false, true, undefined, () => {
       idleMat.diffuseTexture = posterTex;
-      idleMat.emissiveColor = new BABYLON.Color3(0.05, 0.05, 0.08);
+      idleMat.emissiveColor = new BABYLON.Color3(0.10, 0.10, 0.15);
+      console.log(`[视频封面] 加载成功`);
+    }, (_, err) => {
+      console.error(`[视频封面] 加载失败`, err);
     });
   }
 
@@ -35,6 +39,7 @@ export function createVideoPlayer(scene, screenMesh, videoSrc, posterSrc) {
     if (isLoaded) return;
 
     try {
+      console.log(`[视频] 初始化: ${videoSrc}`);
       videoTexture = new BABYLON.VideoTexture(
         'video-tex-' + screenMesh.name,
         videoSrc,
@@ -44,6 +49,7 @@ export function createVideoPlayer(scene, screenMesh, videoSrc, posterSrc) {
         undefined,
         { autoPlay: false, autoUpdateTexture: true }
       );
+      console.log(`[视频] 初始化成功`);
 
       const mat = new BABYLON.StandardMaterial('video-playing-mat-' + screenMesh.name, scene);
       mat.diffuseTexture = videoTexture;

@@ -52,8 +52,14 @@ export function loadTexture(url, scene) {
       true,                    // generateMipMaps
       true,                    // invertY
       undefined,               // samplingMode
-      () => resolve(tex),      // onLoad
-      (_, err) => reject(new Error(`纹理加载失败: ${url} - ${err}`))
+      () => {
+        console.log(`[纹理] 加载成功: ${url} (${tex.getSize().width}x${tex.getSize().height})`);
+        resolve(tex);
+      },
+      (_, err) => {
+        console.error(`[纹理] 加载失败: ${url}`, err);
+        reject(new Error(`纹理加载失败: ${url} - ${err}`));
+      }
     );
   });
 }
