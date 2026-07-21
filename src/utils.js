@@ -74,7 +74,7 @@ function createFloorTexture(scene) {
   const ctx = tex.getContext();
 
   // 深色基底
-  ctx.fillStyle = '#2a3040';
+  ctx.fillStyle = '#1A1C23';
   ctx.fillRect(0, 0, S, S);
 
   // 大块瓷砖网格（浅色凹槽）
@@ -139,7 +139,7 @@ function createWallTexture(scene) {
   const ctx = tex.getContext();
 
   // 深色基底
-  ctx.fillStyle = '#2a2e3a';
+  ctx.fillStyle = '#282E38';
   ctx.fillRect(0, 0, S, S);
 
   // 面板网格（2列×4行面板）
@@ -152,11 +152,18 @@ function createWallTexture(scene) {
       const b = 0.95 + Math.random() * 0.1;
       ctx.fillStyle = `rgba(${Math.round(42*b)}, ${Math.round(46*b)}, ${Math.round(58*b)}, 0.5)`;
       ctx.fillRect(x+3, y+3, pw-6, ph-6);
-      // 面板磨砂纹理
-      for (let i = 0; i < 200; i++) {
+      // 面板磨砂纹理 + 微弱木纹
+      for (let i = 0; i < 300; i++) {
         const px = x + 3 + Math.random()*(pw-6), py = y + 3 + Math.random()*(ph-6);
-        ctx.fillStyle = `rgba(50, 55, 70, ${Math.random()*0.04})`;
+        ctx.fillStyle = `rgba(50, 55, 70, ${Math.random()*0.05})`;
         ctx.fillRect(px, py, 1, 1);
+      }
+      // 木纹条纹
+      for (let ly = y+3; ly < y+ph-3; ly += 3) {
+        const a = 0.02 + Math.random()*0.03;
+        ctx.strokeStyle = `rgba(60, 55, 50, ${a})`;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(x+3, ly); ctx.lineTo(x+pw-3, ly + (Math.random()-0.5)*2); ctx.stroke();
       }
     }
   }
@@ -208,7 +215,7 @@ function createCeilingTexture(scene) {
   const ctx = tex.getContext();
 
   // 深灰基底
-  ctx.fillStyle = '#1e2230';
+  ctx.fillStyle = '#15171C';
   ctx.fillRect(0, 0, S, S);
 
   // 方形网格骨架（金属条）
@@ -262,7 +269,7 @@ function createMetalTexture(scene) {
   const tex = new BABYLON.DynamicTexture('metal-dtex', S, scene, false);
   const ctx = tex.getContext();
 
-  ctx.fillStyle = '#4a5060';
+  ctx.fillStyle = '#808590';
   ctx.fillRect(0, 0, S, S);
 
   // 拉丝纹理（水平方向）
@@ -289,8 +296,8 @@ export function createFloorMaterial(scene) {
   mat.bumpTexture = generateNormalMap(colorTex, scene, 2.0);
   mat.bumpTexture.level = 0.8;
   mat.metallic = 0.08;
-  mat.roughness = 0.12;
-  mat.environmentIntensity = 0.7;
+  mat.roughness = 0.10;  // 镜面抛光
+  mat.environmentIntensity = 0.85;
   return mat;
 }
 
@@ -302,7 +309,7 @@ export function createWallMaterial(scene, name) {
   mat.bumpTexture.level = 0.5;
   mat.metallic = 0.1;
   mat.roughness = 0.6;
-  mat.environmentIntensity = 0.4;
+  mat.environmentIntensity = 0.35;
   return mat;
 }
 
@@ -313,9 +320,9 @@ export function createMetalMaterial(scene, name, color) {
   } else {
     mat.albedoTexture = createMetalTexture(scene);
   }
-  mat.metallic = 0.85;
-  mat.roughness = 0.25;
-  mat.environmentIntensity = 0.85;
+  mat.metallic = 0.92;
+  mat.roughness = 0.22;
+  mat.environmentIntensity = 0.8;
   return mat;
 }
 
@@ -335,9 +342,9 @@ export function createCeilingMaterial(scene) {
   mat.albedoTexture = colorTex;
   mat.bumpTexture = generateNormalMap(colorTex, scene, 0.8);
   mat.bumpTexture.level = 0.3;
-  mat.metallic = 0.15;
-  mat.roughness = 0.6;
-  mat.environmentIntensity = 0.3;
+  mat.metallic = 0.0;
+  mat.roughness = 0.9;  // 完全哑光
+  mat.environmentIntensity = 0.15;
   return mat;
 }
 

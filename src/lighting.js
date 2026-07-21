@@ -4,9 +4,9 @@ export function setupLighting(scene, zones) {
 
   // ── 环境光 ──
   const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.35;  // 暗环境，环境光低
-  ambient.diffuse = new BABYLON.Color3(0.9, 0.92, 1.0);
-  ambient.groundColor = new BABYLON.Color3(0.12, 0.12, 0.15);
+  ambient.intensity = 0.25;  // 更暗的背景
+  ambient.diffuse = new BABYLON.Color3(0.95, 0.96, 1.0);
+  ambient.groundColor = new BABYLON.Color3(0.08, 0.08, 0.10);
 
   // ── 中央大厅多个点光源（均匀照亮整个房间）──
   [[0, 3.5, 0], [0, 3.5, 6], [0, 3.5, -4], [-7, 3.5, 0], [7, 3.5, 0]].forEach(([x, y, z], i) => {
@@ -26,8 +26,9 @@ export function setupLighting(scene, zones) {
         new BABYLON.Vector3(0, -1, 0.3),
         Math.PI / 4, 2, scene
       );
-      spot.intensity = 3.5;  // 暗墙上需要更强的射灯
-      spot.diffuse = new BABYLON.Color3(1.0, 0.97, 0.92);
+      spot.intensity = 4.0;  // 强聚光
+      spot.exponent = 3;      // 更聚焦的光束
+      spot.diffuse = new BABYLON.Color3(1.0, 0.92, 0.78);  // 3000K 暖白
       spot.range = 6;
     }
   }

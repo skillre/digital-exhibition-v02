@@ -140,8 +140,8 @@ async function init() {
     mirror.renderList = scene.meshes.filter(m =>
       m.name.includes('col-') || m.name.includes('poster-board') || m.name.includes('holo-screen') || m.name.includes('holo-base') || m.name.includes('hp') || m.name.includes('icon-')
     );
-    mirror.level = 0.15; // 反射强度（0=无，1=全反射）
-    mirror.adaptiveBlurKernel = 32;
+    mirror.level = 0.08;  // 柔和镜面反射
+    mirror.adaptiveBlurKernel = 64;  // 更模糊的反射
     floor.material.reflectionTexture = mirror;
   }
 

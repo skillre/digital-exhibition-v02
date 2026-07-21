@@ -60,8 +60,14 @@ export function addDecorations(scene, hallInfo) {
   // ═══════════════════════════════════════
   // 3. LED 灯带（#0080FF + #00D4FF）
   // ═══════════════════════════════════════
-  const ledB = new BABYLON.StandardMaterial('led-b', scene); ledB.emissiveColor = new BABYLON.Color3(0, 0.5, 1.0);
-  const ledC = new BABYLON.StandardMaterial('led-c', scene); ledC.emissiveColor = new BABYLON.Color3(0, 0.83, 1.0);
+  const ledB = new BABYLON.PBRMaterial('led-b-pbr', scene);
+  ledB.albedoColor = new BABYLON.Color3(0, 0.2, 0.4);
+  ledB.emissiveColor = new BABYLON.Color3(0, 0.5, 1.0);
+  ledB.metallic = 0; ledB.roughness = 0.5;
+  const ledC = new BABYLON.PBRMaterial('led-c-pbr', scene);
+  ledC.albedoColor = new BABYLON.Color3(0, 0.3, 0.5);
+  ledC.emissiveColor = new BABYLON.Color3(0, 0.83, 1.0);
+  ledC.metallic = 0; ledC.roughness = 0.5;
   // 底部灯带
   [{ l: W, p: [0, 0.2, D/2-.02], r: 0 }, { l: W, p: [0, 0.2, -D/2+.02], r: 0 },
    { l: D, p: [W/2-.02, 0.2, 0], r: Math.PI/2 }, { l: D, p: [-W/2+.02, 0.2, 0], r: Math.PI/2 }
