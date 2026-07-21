@@ -16,6 +16,7 @@ export function setupUI(content, exhibits, cameraCtrl) {
 
   let currentHighlight = null;
   let highlightOriginalEmissive = null;
+  let hitExhibit = null;  // 存储准星命中的展品
 
   // ═══════════════════════════════════════
   // 十字准星系统
@@ -50,6 +51,9 @@ export function setupUI(content, exhibits, cameraCtrl) {
         const mesh = hit.pickedMesh;
         const meta = mesh.metadata;
 
+        // 存储命中结果供点击使用
+        hitExhibit = meta;
+
         // 高亮效果
         if (currentHighlight !== mesh) {
           clearHighlight(scene);
@@ -70,23 +74,24 @@ export function setupUI(content, exhibits, cameraCtrl) {
           }
         }
       } else {
+        hitExhibit = null;
         clearHighlight(scene);
         if (crosshairHint) crosshairHint.style.display = 'none';
       }
     });
 
-    // 点击交互
-    scene.onPointerDown = (evt, pickResult) => {
+    // 点击交互：使用准星 raycast 已存储的命中结果
+    scene.onPointerDown = (evt) => {
       if (!document.pointerLockElement) return;
       if (detailPanel.style.display !== 'none') return;
-      if (!pickResult.hit || !pickResult.pickedMesh?.metadata) return;
+      if (!hitExhibit || !hitExhibit.item) return;
 
-      const meta = pickResult.pickedMesh.metadata;
-      if (meta.type === 'poster' && meta.item) {
+      const meta = hitExhibit;
+      if (meta.type === 'poster') {
         showPosterDetail(meta.item);
-      } else if (meta.type === 'video' && meta.item) {
+      } else if (meta.type === 'video') {
         showVideoDetail(meta.item);
-      } else if (meta.type === 'document' && meta.item) {
+      } else if (meta.type === 'document') {
         showDocDetail(meta.item);
       }
     };
