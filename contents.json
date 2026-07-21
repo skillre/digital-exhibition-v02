@@ -3,14 +3,14 @@
     "title": "数据安全评估服务展厅",
     "subtitle": "XX公司数据安全评估项目成果展示",
     "version": "1.0",
-    "description": "本展厅展示本次数据安全评估服务的完整成果，包括发现的安全风险、防护建议、评估报告等核心内容。通过沉浸式3D体验，帮助全体员工了解数据安全现状，提升安全意识。"
+    "description": "本展厅展示本次数据安全评估服务的完整成果，包括发现的安全风险、防护建议、评估报告等核心内容。"
   },
   "zones": [
     {
       "id": "entrance",
       "name": "入口大厅",
       "type": "entrance",
-      "description": "欢迎进入数据安全评估展厅。本展厅将带您了解本次评估的发现与成果。",
+      "description": "欢迎进入数据安全评估展厅。",
       "welcomeTitle": "欢迎来到数据安全评估展厅",
       "welcomeText": "本次评估覆盖了贵公司核心数据资产的安全状况，发现了多项安全风险并提供了针对性的防护建议。\n\n请自由探索各展区，了解评估成果。"
     },
@@ -22,87 +22,17 @@
       "items": [
         {
           "id": "poster-001",
-          "title": "数据泄露风险概览",
-          "description": "本次评估发现的TOP数据泄露风险点，涵盖网络传输、存储加密、权限管理等多个维度。",
-          "image": "assets/posters/poster-001.jpg",
-          "notes": "建议：立即排查高风险数据传输通道，加密敏感数据存储，定期审计数据访问日志。"
+          "title": "AI原生安全",
+          "description": "AI原生安全能力与客户目标对齐方案",
+          "image": "assets/posters/poster-001.png",
+          "notes": "AI驱动的安全防护体系，实现智能化威胁检测与响应。"
         },
         {
           "id": "poster-002",
-          "title": "内部威胁防护",
-          "description": "内部人员（含外包、合作伙伴）是数据泄露的主要风险源之一。本展板介绍内部威胁的类型和防护措施。",
-          "image": "assets/posters/poster-002.jpg",
-          "notes": "建议：实施最小权限原则，建立数据访问审批流程，部署用户行为分析(UEBA)系统。"
-        },
-        {
-          "id": "poster-003",
-          "title": "合规要求速览",
-          "description": "《数据安全法》《个人信息保护法》等法规对企业的核心合规要求解读。",
-          "image": "assets/posters/poster-003.jpg",
-          "notes": "建议：建立数据分类分级制度，制定数据安全管理办法，定期开展合规自查。"
-        },
-        {
-          "id": "poster-004",
-          "title": "密码安全指南",
-          "description": "弱密码、密码复用是企业安全最常见的薄弱环节。本展板提供密码安全最佳实践。",
-          "image": "assets/posters/poster-004.jpg",
-          "notes": "建议：强制密码复杂度要求，启用多因素认证(MFA)，部署企业密码管理器。"
-        },
-        {
-          "id": "poster-005",
-          "title": "数据分类分级",
-          "description": "数据分类分级是数据安全管理的基础。了解如何正确识别和保护不同级别的数据资产。",
-          "image": "assets/posters/poster-005.jpg",
-          "notes": "建议：制定数据分类分级标准，对核心数据资产进行标识，实施差异化保护策略。"
-        },
-        {
-          "id": "poster-006",
-          "title": "应急响应流程",
-          "description": "数据安全事件的应急响应流程：发现→研判→遏制→根除→恢复→总结。",
-          "image": "assets/posters/poster-006.jpg",
-          "notes": "建议：制定数据安全应急预案，组建应急响应团队，定期开展应急演练。"
-        },
-        {
-          "id": "poster-007",
-          "title": "网络安全防护体系",
-          "description": "企业网络安全防护体系架构设计：边界防护、入侵检测、态势感知、安全运营中心(SOC)。",
-          "image": "assets/posters/poster-007.jpg",
-          "notes": "建议：建设纵深防御体系，部署SIEM系统，实现安全事件统一监控和响应。"
-        },
-        {
-          "id": "poster-008",
-          "title": "终端安全管理",
-          "description": "终端设备安全管控策略：补丁管理、防病毒、DLP、移动设备管理(MDM)。",
-          "image": "assets/posters/poster-008.jpg",
-          "notes": "建议：统一终端管理平台，强制补丁更新策略，部署终端DLP防止数据外泄。"
-        },
-        {
-          "id": "poster-009",
-          "title": "云安全最佳实践",
-          "description": "上云环境下的数据安全挑战与防护：云配置审计、CASB、数据加密、访问控制。",
-          "image": "assets/posters/poster-009.jpg",
-          "notes": "建议：实施云安全态势管理(CSPM)，启用云访问安全代理(CASB)，加密云端敏感数据。"
-        },
-        {
-          "id": "poster-010",
-          "title": "供应链安全",
-          "description": "第三方供应商和合作伙伴的数据安全风险管理：供应商评估、合同约束、持续监控。",
-          "image": "assets/posters/poster-010.jpg",
-          "notes": "建议：建立供应商安全评估机制，签署数据保护协议，定期审计第三方访问权限。"
-        },
-        {
-          "id": "poster-011",
-          "title": "安全意识培训要点",
-          "description": "全员安全意识培训核心内容：钓鱼识别、密码管理、社工防范、数据保护。",
-          "image": "assets/posters/poster-011.jpg",
-          "notes": "建议：每季度开展安全意识培训，模拟钓鱼测试，建立安全文化激励机制。"
-        },
-        {
-          "id": "poster-012",
-          "title": "数据安全治理框架",
-          "description": "企业数据安全治理整体框架：组织架构、制度体系、技术平台、运营机制。",
-          "image": "assets/posters/poster-012.jpg",
-          "notes": "建议：成立数据安全委员会，制定数据安全策略，建设统一数据安全治理平台。"
+          "title": "安全评估成果",
+          "description": "数据安全评估项目核心成果展示",
+          "image": "assets/posters/poster-002.jpeg",
+          "notes": "全面评估企业数据资产安全状况，发现关键风险点。"
         }
       ]
     },
@@ -114,17 +44,10 @@
       "items": [
         {
           "id": "video-001",
-          "title": "数据安全评估项目介绍",
-          "description": "数据安全评估服务全流程介绍：从需求分析、资产梳理、漏洞检测到报告输出的完整过程。",
+          "title": "项目介绍视频",
+          "description": "数据安全评估服务全流程介绍",
           "src": "assets/videos/video-001.mp4",
-          "poster": "assets/posters/poster-001.jpg"
-        },
-        {
-          "id": "video-002",
-          "title": "数据安全意识宣传片",
-          "description": "面向全体员工的数据安全意识宣传片：真实案例还原、安全威胁解读、防护措施演示。",
-          "src": "assets/videos/video-002.mp4",
-          "poster": "assets/posters/poster-011.jpg"
+          "poster": "assets/posters/poster-001.png"
         }
       ]
     },
@@ -136,44 +59,23 @@
       "items": [
         {
           "id": "doc-001",
-          "title": "数据安全评估报告（摘要版）",
-          "description": "本次数据安全评估的完整报告摘要，包含评估范围、方法、发现、风险评级和整改建议。",
-          "type": "image",
-          "src": "assets/docs/doc-001-placeholder.png"
+          "title": "AI原生安全客户目标对齐",
+          "description": "AI原生安全能力与客户目标对齐方案文档",
+          "type": "pdf",
+          "src": "assets/docs/doc-001.pdf"
         },
         {
           "id": "doc-002",
-          "title": "数据安全管理制度（建议稿）",
-          "description": "基于本次评估发现，为企业起草的数据安全管理制度建议稿，涵盖组织架构、职责分工、操作规程等。",
-          "type": "image",
-          "src": "assets/docs/doc-002-placeholder.png"
-        },
-        {
-          "id": "doc-003",
-          "title": "数据安全培训资料",
-          "description": "面向全体员工的数据安全意识培训资料，包含常见威胁案例、防护要点和操作规范。",
-          "type": "image",
-          "src": "assets/docs/doc-003-placeholder.png"
-        },
-        {
-          "id": "doc-004",
-          "title": "漏洞扫描与渗透测试报告",
-          "description": "本次评估中漏洞扫描和渗透测试的详细技术报告，包含发现的漏洞清单、风险等级和修复建议。",
-          "type": "image",
-          "src": "assets/docs/doc-004-placeholder.png"
-        },
-        {
-          "id": "doc-005",
-          "title": "数据安全整改路线图",
-          "description": "基于评估发现制定的数据安全整改路线图，分短期、中期、长期三个阶段，明确责任人和时间节点。",
-          "type": "image",
-          "src": "assets/docs/doc-005-placeholder.png"
+          "title": "云桌面对比分析",
+          "description": "云桌面解决方案对比分析报告",
+          "type": "pdf",
+          "src": "assets/docs/doc-002.pdf"
         }
       ]
     },
     {
       "id": "summary",
-      "name": "总结大厅",
+      "name": "总结",
       "type": "summary",
       "description": "数据安全，人人有责",
       "summaryTitle": "数据安全，人人有责",
