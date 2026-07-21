@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>数据安全评估服务展厅</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 3D 渲染画布 -->
+  <canvas id="renderCanvas"></canvas>
+
+  <!-- HTML 叠加层容器（文档弹窗、海报弹窗等） -->
+  <div id="overlay-container" class="overlay-container" style="display:none;"></div>
+
+  <!-- 加载画面 -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-content">
+      <div class="loading-logo">🔒</div>
+      <h1>数据安全评估服务展厅</h1>
+      <p class="loading-subtitle">沉浸式体验数据安全评估成果</p>
+      <div class="loading-bar">
+        <div class="loading-progress" id="loading-progress"></div>
+      </div>
+      <p class="loading-text" id="loading-text">正在初始化引擎...</p>
+    </div>
+  </div>
+
+  <!-- 移动端降级提示 -->
+  <div id="mobile-notice" class="mobile-notice" style="display:none;">
+    <div class="mobile-notice-content">
+      <div class="mobile-icon">💻</div>
+      <h2>请使用电脑浏览器访问</h2>
+      <p>本展厅为 3D 沉浸式体验，推荐使用电脑端 Chrome / Edge / Firefox 浏览器</p>
+    </div>
+  </div>
+
+  <!-- Pointer Lock 提示 -->
+  <div id="pointer-hint" class="pointer-hint" style="display:none;">
+    点击画面进入自由视角 · 按 ESC 退出
+  </div>
+
+  <!-- 展区跳转菜单（由 JS 动态填充） -->
+  <div id="nav-menu" class="nav-menu" style="display:none;"></div>
+
+  <!-- Vendor Babylon.js (UMD, exposes global BABYLON) -->
+  <script src="lib/babylon.js"></script>
+  <script src="lib/babylon.gui.js"></script>
+
+  <!-- App entry (ES Module) -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
