@@ -70,8 +70,12 @@ export function setupUI(content, exhibits, cameraCtrl) {
 
   // ESC 关闭弹窗
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && overlayContainer.style.display !== 'none') {
-      hideOverlay();
+    if (e.key === 'q' || e.key === 'Q') {
+      if (overlayContainer.style.display !== 'none') {
+        hideOverlay();
+      } else if (cameraCtrl && cameraCtrl.isLocked()) {
+        cameraCtrl.unlock();
+      }
     }
   });
 

@@ -71,10 +71,10 @@ export function setupCamera(scene, canvas, hallInfo) {
   function updatePointerHint() {
     if (!pointerHint) return;
     if (isLocked) {
-      pointerHint.textContent = '按 ESC 退出自由视角';
+      pointerHint.textContent = '按 Q 退出自由视角';
       pointerHint.style.display = 'block';
     } else {
-      pointerHint.textContent = '点击画面进入自由视角 · WASD 移动 · 鼠标转向';
+      pointerHint.textContent = '点击画面进入自由视角 · WASD 移动 · 鼠标转向 · Q 退出';
       pointerHint.style.display = 'block';
     }
   }
@@ -105,12 +105,11 @@ export function setupCamera(scene, canvas, hallInfo) {
     }
   }
 
-  // ── 键盘事件（ESC 关闭弹窗由 ui.js 处理）──
-  // 防止 WASD 在输入框中触发
+  // ── Q 键退出 Pointer Lock ──
   document.addEventListener('keydown', (e) => {
-    // 只在 Pointer Lock 状态下处理移动键
-    if (!isLocked) return;
-    // 不阻止其他模块的 ESC 处理
+    if ((e.key === 'q' || e.key === 'Q') && isLocked) {
+      document.exitPointerLock();
+    }
   });
 
   return {
