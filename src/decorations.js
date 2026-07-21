@@ -1,4 +1,4 @@
-// src/decorations.js — 单间展厅装饰系统（充实版）
+// src/decorations.js — 单间展厅装饰系统
 
 export function addDecorations(scene, hallInfo) {
   const meshes = [];
@@ -16,22 +16,6 @@ export function addDecorations(scene, hallInfo) {
   const lightBarMat = new BABYLON.PBRMaterial('lightbar-pbr', scene);
   lightBarMat.albedoColor = new BABYLON.Color3(0.75, 0.78, 0.85);
   lightBarMat.metallic = 0.5; lightBarMat.roughness = 0.3;
-
-  const panelMat = new BABYLON.PBRMaterial('wall-panel', scene);
-  panelMat.albedoColor = new BABYLON.Color3(0.7, 0.73, 0.80);
-  panelMat.metallic = 0.1; panelMat.roughness = 0.5; panelMat.environmentIntensity = 0.5;
-
-  const darkPanelMat = new BABYLON.PBRMaterial('dark-panel', scene);
-  darkPanelMat.albedoColor = new BABYLON.Color3(0.15, 0.18, 0.28);
-  darkPanelMat.metallic = 0.2; darkPanelMat.roughness = 0.4;
-
-  const benchMat = new BABYLON.PBRMaterial('bench', scene);
-  benchMat.albedoColor = new BABYLON.Color3(0.25, 0.22, 0.20);
-  benchMat.metallic = 0; benchMat.roughness = 0.7;
-
-  const benchLegMat = new BABYLON.PBRMaterial('bench-leg', scene);
-  benchLegMat.albedoColor = new BABYLON.Color3(0.6, 0.62, 0.68);
-  benchLegMat.metallic = 0.7; benchLegMat.roughness = 0.3;
 
   // ═══════════════════════════════════════
   // 1. 立柱（4根）
@@ -56,19 +40,16 @@ export function addDecorations(scene, hallInfo) {
   lightMat.diffuseColor = new BABYLON.Color3(0.92, 0.95, 1.0);
   lightMat.emissiveColor = new BABYLON.Color3(0.7, 0.75, 0.85);
 
-  // 十字灯带
   for (let r = 0; r < 2; r++) {
     const s = BABYLON.MeshBuilder.CreateBox(`cs-${r}`, { width: 0.25, height: 0.04, depth: D * 0.65 }, scene);
     s.position = new BABYLON.Vector3(0, H - 0.01, 0); s.rotation.y = r * Math.PI / 2; s.material = lightMat;
     meshes.push(s);
   }
-  // 方形灯框
   const fS = 14;
   [[0, fS / 2, true], [0, -fS / 2, true], [fS / 2, 0, false], [-fS / 2, 0, false]].forEach(([x, z, h], i) => {
     const f = BABYLON.MeshBuilder.CreateBox(`cf-${i}`, { width: h ? fS : 0.2, height: 0.04, depth: h ? 0.2 : fS }, scene);
     f.position = new BABYLON.Vector3(x, H - 0.01, z); f.material = lightMat; meshes.push(f);
   });
-  // 嵌入灯盘
   const cpMat = new BABYLON.StandardMaterial('cp', scene);
   cpMat.diffuseColor = new BABYLON.Color3(0.93, 0.95, 1.0); cpMat.emissiveColor = new BABYLON.Color3(0.75, 0.8, 0.9);
   [[-5, 4], [0, 4], [5, 4], [-5, -2], [0, -2], [5, -2], [-5, 8], [5, 8]].forEach(([x, z], i) => {
@@ -81,14 +62,12 @@ export function addDecorations(scene, hallInfo) {
   // ═══════════════════════════════════════
   const ledB = new BABYLON.StandardMaterial('led-b', scene); ledB.emissiveColor = new BABYLON.Color3(0.1, 0.6, 1.0);
   const ledC = new BABYLON.StandardMaterial('led-c', scene); ledC.emissiveColor = new BABYLON.Color3(0.1, 0.75, 0.9);
-  // 底部
   [{ l: W, p: [0, 0.2, D/2-.02], r: 0 }, { l: W, p: [0, 0.2, -D/2+.02], r: 0 },
    { l: D, p: [W/2-.02, 0.2, 0], r: Math.PI/2 }, { l: D, p: [-W/2+.02, 0.2, 0], r: Math.PI/2 }
   ].forEach((c, i) => {
     const s = BABYLON.MeshBuilder.CreateBox(`led-${i}`, { width: c.l, height: 0.05, depth: 0.03 }, scene);
     s.position = new BABYLON.Vector3(...c.p); s.rotation.y = c.r; s.material = i % 2 ? ledC : ledB; meshes.push(s);
   });
-  // 中段
   [{ l: W, p: [0, 2.6, D/2-.02], r: 0 }, { l: W, p: [0, 2.6, -D/2+.02], r: 0 },
    { l: D, p: [W/2-.02, 2.6, 0], r: Math.PI/2 }, { l: D, p: [-W/2+.02, 2.6, 0], r: Math.PI/2 }
   ].forEach((c, i) => {
@@ -144,89 +123,7 @@ export function addDecorations(scene, hallInfo) {
   meshes.push(base, oRing, iRing, pillar, s1, s2);
 
   // ═══════════════════════════════════════
-  // 6. 墙面装饰板（四面墙都有）
-  // ═══════════════════════════════════════
-  // 北墙（海报墙两侧）装饰板
-  [[-9.5, 2.0, D/2-0.12], [9.5, 2.0, D/2-0.12]].forEach(([x, y, z], i) => {
-    const dp = BABYLON.MeshBuilder.CreateBox(`dp-n-${i}`, { width: 3.5, height: 2.5, depth: 0.08 }, scene);
-    dp.position = new BABYLON.Vector3(x, y, z); dp.rotation.y = Math.PI; dp.material = panelMat; dp.checkCollisions = true;
-    meshes.push(dp);
-  });
-
-  // 东墙（视频屏上下）装饰板
-  [[W/2-0.12, 1.0, 0], [W/2-0.12, 3.5, 0]].forEach(([x, y, z], i) => {
-    const dp = BABYLON.MeshBuilder.CreateBox(`dp-e-${i}`, { width: 0.08, height: 1.2, depth: 5 }, scene);
-    dp.position = new BABYLON.Vector3(x, y, z); dp.rotation.y = Math.PI/2; dp.material = panelMat; meshes.push(dp);
-  });
-
-  // 西墙（标语牌两侧）装饰板
-  [[-W/2+0.12, 2.0, -5], [-W/2+0.12, 2.0, 5]].forEach(([x, y, z], i) => {
-    const dp = BABYLON.MeshBuilder.CreateBox(`dp-w-${i}`, { width: 0.08, height: 2.5, depth: 3 }, scene);
-    dp.position = new BABYLON.Vector3(x, y, z); dp.rotation.y = -Math.PI/2; dp.material = panelMat; meshes.push(dp);
-  });
-
-  // ═══════════════════════════════════════
-  // 7. 壁灯（四面墙各2个）
-  // ═══════════════════════════════════════
-  const wallLightMat = new BABYLON.StandardMaterial('wl', scene);
-  wallLightMat.diffuseColor = new BABYLON.Color3(0.9, 0.92, 1.0); wallLightMat.emissiveColor = new BABYLON.Color3(0.7, 0.75, 0.85);
-  const wallLightBaseMat = new BABYLON.PBRMaterial('wlb', scene);
-  wallLightBaseMat.albedoColor = new BABYLON.Color3(0.7, 0.72, 0.78); wallLightBaseMat.metallic = 0.6; wallLightBaseMat.roughness = 0.3;
-
-  [
-    { p: [-5, 3.0, D/2-0.15], r: 0 }, { p: [5, 3.0, D/2-0.15], r: 0 },
-    { p: [-5, 3.0, -D/2+0.15], r: Math.PI }, { p: [5, 3.0, -D/2+0.15], r: Math.PI },
-    { p: [W/2-0.15, 3.0, -4], r: Math.PI/2 }, { p: [W/2-0.15, 3.0, 4], r: Math.PI/2 },
-    { p: [-W/2+0.15, 3.0, -4], r: -Math.PI/2 }, { p: [-W/2+0.15, 3.0, 4], r: -Math.PI/2 },
-  ].forEach((cfg, i) => {
-    // 壁灯底座
-    const lb = BABYLON.MeshBuilder.CreateBox(`wlb-${i}`, { width: 0.4, height: 0.15, depth: 0.1 }, scene);
-    lb.position = new BABYLON.Vector3(...cfg.p); lb.rotation.y = cfg.r; lb.material = wallLightBaseMat;
-    // 灯罩
-    const ls = BABYLON.MeshBuilder.CreateBox(`wls-${i}`, { width: 0.3, height: 0.25, depth: 0.08 }, scene);
-    ls.position = new BABYLON.Vector3(cfg.p[0], cfg.p[1] + 0.2, cfg.p[2]); ls.rotation.y = cfg.r; ls.material = wallLightMat;
-    meshes.push(lb, ls);
-  });
-
-  // ═══════════════════════════════════════
-  // 8. 视频区座椅（3排）
-  // ═══════════════════════════════════════
-  for (let row = 0; row < 3; row++) {
-    for (let seat = 0; seat < 3; seat++) {
-      const x = 3 + seat * 2.0;
-      const z = -2 + row * 2.2;
-      // 座面
-      const seatMesh = BABYLON.MeshBuilder.CreateBox(`seat-${row}-${seat}`, { width: 1.6, height: 0.08, depth: 0.8 }, scene);
-      seatMesh.position = new BABYLON.Vector3(x, 0.55, z); seatMesh.material = benchMat;
-      // 靠背
-      const back = BABYLON.MeshBuilder.CreateBox(`back-${row}-${seat}`, { width: 1.6, height: 0.6, depth: 0.08 }, scene);
-      back.position = new BABYLON.Vector3(x, 0.85, z + 0.35); back.material = benchMat;
-      // 椅腿
-      [[-0.6, -0.3], [0.6, -0.3], [-0.6, 0.3], [0.6, 0.3]].forEach(([dx, dz], li) => {
-        const leg = BABYLON.MeshBuilder.CreateCylinder(`leg-${row}-${seat}-${li}`, { diameter: 0.05, height: 0.5, tessellation: 8 }, scene);
-        leg.position = new BABYLON.Vector3(x + dx, 0.25, z + dz); leg.material = benchLegMat;
-        meshes.push(leg);
-      });
-      meshes.push(seatMesh, back);
-    }
-  }
-
-  // ═══════════════════════════════════════
-  // 9. 入口信息亭
-  // ═══════════════════════════════════════
-  // 信息亭底座
-  const kioskBase = BABYLON.MeshBuilder.CreateBox('kiosk-base', { width: 1.2, height: 1.0, depth: 0.6 }, scene);
-  kioskBase.position = new BABYLON.Vector3(-4, 0.5, -6); kioskBase.material = darkPanelMat; kioskBase.checkCollisions = true;
-  // 信息亭屏幕
-  const kioskScreen = BABYLON.MeshBuilder.CreatePlane('kiosk-screen', { width: 1.0, height: 0.7 }, scene);
-  kioskScreen.position = new BABYLON.Vector3(-4, 1.2, -6.25); kioskScreen.material = wallLightMat;
-  // 信息亭柱子
-  const kioskPole = BABYLON.MeshBuilder.CreateCylinder('kiosk-pole', { diameter: 0.08, height: 0.5, tessellation: 8 }, scene);
-  kioskPole.position = new BABYLON.Vector3(-4, 0.75, -6); kioskPole.material = benchLegMat;
-  meshes.push(kioskBase, kioskScreen, kioskPole);
-
-  // ═══════════════════════════════════════
-  // 10. 海报灯架
+  // 6. 海报灯架
   // ═══════════════════════════════════════
   if (hallInfo.zones.get('poster-zone')?.boards) {
     for (const board of hallInfo.zones.get('poster-zone').boards) {
@@ -237,7 +134,7 @@ export function addDecorations(scene, hallInfo) {
   }
 
   // ═══════════════════════════════════════
-  // 11. 展柜台灯
+  // 7. 展柜台灯
   // ═══════════════════════════════════════
   const lampMat = new BABYLON.StandardMaterial('lamp', scene);
   lampMat.diffuseColor = new BABYLON.Color3(0.9, 0.85, 0.7); lampMat.emissiveColor = new BABYLON.Color3(0.5, 0.45, 0.35);
@@ -254,7 +151,7 @@ export function addDecorations(scene, hallInfo) {
   }
 
   // ═══════════════════════════════════════
-  // 12. 浮动粒子
+  // 8. 浮动粒子
   // ═══════════════════════════════════════
   const ps = new BABYLON.ParticleSystem('particles', 200, scene);
   const pTex = new BABYLON.DynamicTexture('pt', 64, scene, false);
