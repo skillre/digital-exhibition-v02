@@ -22,7 +22,7 @@ export function createVideoPlayer(scene, screenMesh, videoSrc, posterSrc) {
 
   // 尝试加载封面图
   if (posterSrc) {
-    const posterTex = new BABYLON.Texture(posterSrc, scene, false, false, undefined, () => {
+    const posterTex = new BABYLON.Texture(posterSrc, scene, false, true, undefined, () => {
       idleMat.diffuseTexture = posterTex;
       idleMat.emissiveColor = new BABYLON.Color3(0.05, 0.05, 0.08);
     });
@@ -40,7 +40,7 @@ export function createVideoPlayer(scene, screenMesh, videoSrc, posterSrc) {
         videoSrc,
         scene,
         true,   // generateMipMaps
-        false,  // invertY
+        true,   // invertY
         undefined,
         { autoPlay: false, autoUpdateTexture: true }
       );

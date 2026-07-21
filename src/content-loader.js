@@ -50,7 +50,7 @@ export function loadTexture(url, scene) {
       url,
       scene,
       true,                    // generateMipMaps
-      false,                   // invertY
+      true,                    // invertY
       undefined,               // samplingMode
       () => resolve(tex),      // onLoad
       (_, err) => reject(new Error(`纹理加载失败: ${url} - ${err}`))
@@ -72,7 +72,7 @@ export function createVideoTexture(url, scene) {
         url,
         scene,
         true,   // generateMipMaps
-        false,  // invertY
+        true,   // invertY
         undefined, // samplingMode
         {},     // settings
         () => resolve(vt),
