@@ -4,16 +4,16 @@ export function setupLighting(scene, zones) {
 
   // ── 环境光 ──
   const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.38;
+  ambient.intensity = 0.65;
   ambient.diffuse = new BABYLON.Color3(0.95, 0.96, 1.0);
-  ambient.groundColor = new BABYLON.Color3(0.12, 0.13, 0.18);
+  ambient.groundColor = new BABYLON.Color3(0.18, 0.19, 0.25);
 
   // ── 中央大厅多个点光源（均匀照亮整个房间）──
   [[0, 3.5, 0], [0, 3.5, 6], [0, 3.5, -4], [-7, 3.5, 0], [7, 3.5, 0]].forEach(([x, y, z], i) => {
     const pl = new BABYLON.PointLight(`center-${i}`, new BABYLON.Vector3(x, y, z), scene);
-    pl.intensity = i === 0 ? 1.6 : 1.0;
+    pl.intensity = i === 0 ? 2.2 : 1.5;
     pl.diffuse = new BABYLON.Color3(0.95, 0.96, 1.0);
-    pl.range = 18;
+    pl.range = 22;
   });
 
   // ── 北墙海报：展板射灯 ──

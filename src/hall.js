@@ -143,10 +143,11 @@ export function createHall(scene) {
   screen.position = new BABYLON.Vector3(HALF_W - 0.15, 2.4, 0);
   screen.rotation.y = Math.PI / 2;
   const screenMat = new BABYLON.PBRMaterial('screen-pbr', scene);
-  screenMat.albedoColor = new BABYLON.Color3(0.15, 0.18, 0.28);
+  screenMat.albedoColor = new BABYLON.Color3(0.22, 0.26, 0.40);
   screenMat.metallic = 0.3;
   screenMat.roughness = 0.4;
-  screenMat.emissiveColor = new BABYLON.Color3(0.08, 0.10, 0.18);
+  screenMat.emissiveColor = new BABYLON.Color3(0.12, 0.15, 0.25);
+  screenMat.environmentIntensity = 0.6;
   screen.material = screenMat;
   screen.isPickable = true;
   hallMeshes.push(screen);

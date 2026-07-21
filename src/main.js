@@ -34,7 +34,7 @@ async function init() {
   // ── 环境贴图（PBR 反射的核心）──
   const envTexture = BABYLON.CubeTexture.CreateFromPrefilteredData('lib/environment.env', scene);
   scene.environmentTexture = envTexture;
-  scene.environmentIntensity = 0.5;  // 中等反射强度，不洗掉颜色
+  scene.environmentIntensity = 1.0;  // PBR 材质主要光源
 
   // 发光层
   const glowLayer = new BABYLON.GlowLayer('glow', scene, { mainTextureFixedSize: 512 });
@@ -91,8 +91,8 @@ async function init() {
   // 色调映射
   pipeline.imageProcessing.toneMappingEnabled = true;
   pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-  pipeline.imageProcessing.exposure = 1.35;
-  pipeline.imageProcessing.contrast = 1.12;    // 适度对比度 → 层次感
+  pipeline.imageProcessing.exposure = 1.5;
+  pipeline.imageProcessing.contrast = 1.05;
   pipeline.imageProcessing.vignetteEnabled = true;
   pipeline.imageProcessing.vignetteWeight = 1.0;
   pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
@@ -108,8 +108,8 @@ async function init() {
   // ── SSAO2（屏幕空间环境光遮蔽 → 接触阴影）──
   const ssao = new BABYLON.SSAO2RenderingPipeline('ssao', scene, { ssaoRatio: 0.5, blurRatio: 0.5 });
   ssao.radius = 2.5;
-  ssao.totalStrength = 1.2;
-  ssao.base = 0.1;
+  ssao.totalStrength = 0.5;
+  ssao.base = 0.05;
   ssao.samples = 16;
   ssao.maxZ = 100;
   ssao.minZAspect = 0.5;

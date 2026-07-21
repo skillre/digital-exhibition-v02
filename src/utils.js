@@ -309,7 +309,7 @@ export function createWallMaterial(scene, name) {
   mat.bumpTexture.level = 0.5;
   mat.metallic = 0.1;
   mat.roughness = 0.6;
-  mat.environmentIntensity = 0.35;
+  mat.environmentIntensity = 0.6;
   return mat;
 }
 
@@ -332,7 +332,7 @@ export function createBoardMaterial(scene, name) {
   mat.metallic = 0.05;
   mat.roughness = 0.45;
   mat.emissiveColor = new BABYLON.Color3(0.05, 0.05, 0.07);
-  mat.environmentIntensity = 0.45;
+  mat.environmentIntensity = 0.65;
   return mat;
 }
 
@@ -344,7 +344,7 @@ export function createCeilingMaterial(scene) {
   mat.bumpTexture.level = 0.3;
   mat.metallic = 0.0;
   mat.roughness = 0.9;  // 完全哑光
-  mat.environmentIntensity = 0.15;
+  mat.environmentIntensity = 0.4;
   return mat;
 }
 

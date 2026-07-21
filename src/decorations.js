@@ -6,16 +6,17 @@ export function addDecorations(scene, hallInfo) {
 
   // ── 材质 ──
   const colMat = new BABYLON.PBRMaterial('col-pbr', scene);
-  colMat.albedoColor = new BABYLON.Color3(0.35, 0.38, 0.48);
-  colMat.metallic = 0.4; colMat.roughness = 0.25; colMat.environmentIntensity = 0.7;
+  colMat.albedoColor = new BABYLON.Color3(0.40, 0.43, 0.53);
+  colMat.metallic = 0.4; colMat.roughness = 0.25; colMat.environmentIntensity = 0.85;
 
   const accentMat = new BABYLON.StandardMaterial('accent', scene);
   accentMat.diffuseColor = new BABYLON.Color3(0, 0.5, 1.0);
   accentMat.emissiveColor = new BABYLON.Color3(0, 0.5, 1.0);
 
   const lightBarMat = new BABYLON.PBRMaterial('lightbar-pbr', scene);
-  lightBarMat.albedoColor = new BABYLON.Color3(0.45, 0.48, 0.58);
+  lightBarMat.albedoColor = new BABYLON.Color3(0.50, 0.53, 0.63);
   lightBarMat.metallic = 0.5; lightBarMat.roughness = 0.3;
+  lightBarMat.environmentIntensity = 0.75;
 
   // ═══════════════════════════════════════
   // 1. 立柱（4根）
