@@ -39,16 +39,17 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.keysLeft = [65];   // A - 左移
   camera.keysRight = [68];  // D - 右移
 
-  // 额外键位
-  camera.keysUpward = [32];     // Space - 上浮（调试用）
-  camera.keysDownward = [16];   // Shift - 下沉（调试用）
+  // 禁用上下移动
+  camera.keysUpward = [];
+  camera.keysDownward = [];
 
-  // ── 视角限制（防止头朝下/翻转）──
-  camera.upperBetaLimit = Math.PI * 0.75;  // 向下看最大角度
-  camera.lowerBetaLimit = Math.PI * 0.15;  // 向上看最大角度
+  // ── 锁定水平视角（每帧强制 rotation.x = 0）──
+  scene.onBeforeRenderObservable.add(() => {
+    camera.rotation.x = 0;
+  });
 
   // 附加控制
-  camera.attachControl(canvas, false); // false = 不自动捕获所有输入
+  camera.attachControl(canvas, false);
 
   // ── Pointer Lock 系统 ──
   let isLocked = false;
