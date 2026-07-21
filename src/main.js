@@ -28,17 +28,17 @@ async function init() {
   tracker.setProgress(30, '正在创建场景...');
 
   const scene = new BABYLON.Scene(engine);
-  scene.clearColor = new BABYLON.Color4(0.94, 0.93, 0.91, 1);  // 暖白背景
-  scene.ambientColor = new BABYLON.Color3(0.4, 0.4, 0.38);
+  scene.clearColor = new BABYLON.Color4(0.10, 0.12, 0.16, 1);  // 深色背景匹配暗墙
+  scene.ambientColor = new BABYLON.Color3(0.15, 0.15, 0.18);
 
   // ── 环境贴图（PBR 反射的核心）──
   const envTexture = BABYLON.CubeTexture.CreateFromPrefilteredData('lib/environment.env', scene);
   scene.environmentTexture = envTexture;
-  scene.environmentIntensity = 0.8;
+  scene.environmentIntensity = 1.0;  // PBR 材质主要光源
 
-  // 发光层（企业风格：只让品牌色元素发光）
-  const glowLayer = new BABYLON.GlowLayer('glow', scene, { mainTextureFixedSize: 512, blurKernelSize: 32 });
-  glowLayer.intensity = 0.3;
+  // 发光层
+  const glowLayer = new BABYLON.GlowLayer('glow', scene, { mainTextureFixedSize: 512 });
+  glowLayer.intensity = 0.5;
 
   // ── Phase 1 临时灯光（Phase 2 替换）──
   const light = new BABYLON.HemisphericLight('temp-light', new BABYLON.Vector3(0, 1, 0), scene);
@@ -84,16 +84,19 @@ async function init() {
   pipeline.samples = 4;
   pipeline.fxaaEnabled = true;
   pipeline.bloomEnabled = true;
-  pipeline.bloomThreshold = 0.7;   // 只有高亮区域才发光
-  pipeline.bloomWeight = 0.15;     // 柔和发光
-  pipeline.bloomKernel = 32;
+  pipeline.bloomThreshold = 0.35;
+  pipeline.bloomWeight = 0.3;
+  pipeline.bloomKernel = 64;
   pipeline.bloomScale = 0.5;
   // 色调映射
   pipeline.imageProcessing.toneMappingEnabled = true;
   pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-  pipeline.imageProcessing.exposure = 1.3;
-  pipeline.imageProcessing.contrast = 1.0;  // 柔和，无对比
-  pipeline.imageProcessing.vignetteEnabled = false;  // 明亮风格不需要暗角
+  pipeline.imageProcessing.exposure = 1.5;
+  pipeline.imageProcessing.contrast = 1.05;
+  pipeline.imageProcessing.vignetteEnabled = true;
+  pipeline.imageProcessing.vignetteWeight = 1.0;
+  pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
+  pipeline.imageProcessing.vignetteStretch = 0.5;
 
   // ── 锐化（通过 DefaultRenderingPipeline 内置）──
   if (pipeline.sharpenEnabled !== undefined) {
@@ -105,7 +108,7 @@ async function init() {
   // ── SSAO2（屏幕空间环境光遮蔽 → 接触阴影）──
   const ssao = new BABYLON.SSAO2RenderingPipeline('ssao', scene, { ssaoRatio: 0.5, blurRatio: 0.5 });
   ssao.radius = 2.5;
-  ssao.totalStrength = 0.4;  // 轻触阴影
+  ssao.totalStrength = 0.5;
   ssao.base = 0.05;
   ssao.samples = 16;
   ssao.maxZ = 100;
@@ -121,7 +124,7 @@ async function init() {
     const sg = new BABYLON.ShadowGenerator(512, light);
     sg.usePercentageCloserFiltering = true;
     sg.filteringQuality = BABYLON.ShadowGenerator.QUALITY_LOW;
-    sg.darkness = 0.3;  // 柔和阴影
+    sg.darkness = 0.5;
     scene.meshes.forEach(m => {
       if (m.name.includes('poster-board') || m.name.includes('poster-lightbar') || m.name.includes('showcase-') || m.name.includes('col-')) {
         sg.addShadowCaster(m);
@@ -137,8 +140,8 @@ async function init() {
     mirror.renderList = scene.meshes.filter(m =>
       m.name.includes('col-') || m.name.includes('poster-board') || m.name.includes('holo-screen') || m.name.includes('holo-base') || m.name.includes('hp') || m.name.includes('icon-')
     );
-    mirror.level = 0.04;  // 浅色地板微弱反射
-    mirror.adaptiveBlurKernel = 32;
+    mirror.level = 0.08;  // 柔和镜面反射
+    mirror.adaptiveBlurKernel = 64;  // 更模糊的反射
     floor.material.reflectionTexture = mirror;
   }
 
