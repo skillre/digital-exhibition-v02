@@ -3,25 +3,25 @@
    ============================================ */
 
 :root {
-  /* 主色调 */
-  --bg-primary: #0a0a1a;
-  --bg-secondary: #1a1a2e;
-  --bg-zone: #0f3460;
-  --bg-panel: rgba(15, 52, 96, 0.95);
+  /* 主色调（明亮企业风） */
+  --bg-primary: #f5f3f0;
+  --bg-secondary: #eae7e2;
+  --bg-zone: #f0ede8;
+  --bg-panel: rgba(245, 243, 240, 0.95);
 
-  /* 强调色 */
-  --accent-blue: #0077ff;
-  --accent-cyan: #00e5ff;
-  --accent-glow: rgba(0, 119, 255, 0.4);
+  /* 强调色（品牌蓝） */
+  --accent-blue: #1a5276;
+  --accent-cyan: #2980b9;
+  --accent-glow: rgba(41, 128, 185, 0.3);
 
   /* 文字 */
-  --text-primary: #e0e0e0;
-  --text-secondary: #8899aa;
-  --text-bright: #ffffff;
+  --text-primary: #2c3e50;
+  --text-secondary: #7f8c8d;
+  --text-bright: #ecf0f1;
 
   /* 边框 */
-  --border-subtle: rgba(0, 119, 255, 0.2);
-  --border-active: rgba(0, 229, 255, 0.6);
+  --border-subtle: rgba(26, 82, 118, 0.15);
+  --border-active: rgba(41, 128, 185, 0.4);
 }
 
 /* Reset */

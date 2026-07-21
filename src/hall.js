@@ -143,11 +143,11 @@ export function createHall(scene) {
   screen.position = new BABYLON.Vector3(HALF_W - 0.15, 2.4, 0);
   screen.rotation.y = Math.PI / 2;
   const screenMat = new BABYLON.PBRMaterial('screen-pbr', scene);
-  screenMat.albedoColor = new BABYLON.Color3(0.22, 0.26, 0.40);
+  screenMat.albedoColor = new BABYLON.Color3(0.15, 0.18, 0.25);
   screenMat.metallic = 0.3;
   screenMat.roughness = 0.4;
-  screenMat.emissiveColor = new BABYLON.Color3(0.12, 0.15, 0.25);
-  screenMat.environmentIntensity = 0.6;
+  screenMat.emissiveColor = new BABYLON.Color3(0.05, 0.06, 0.10);
+  screenMat.environmentIntensity = 0.5;
   screen.material = screenMat;
   screen.isPickable = true;
   hallMeshes.push(screen);
@@ -204,16 +204,16 @@ export function createHall(scene) {
   banner.position = new BABYLON.Vector3(-HALF_W + 0.15, 2.2, 0);
   banner.rotation.y = -Math.PI / 2;
   const bannerMat = new BABYLON.PBRMaterial('banner-pbr', scene);
-  bannerMat.albedoColor = new BABYLON.Color3(0.2, 0.35, 0.6);
-  bannerMat.metallic = 0.1;
-  bannerMat.roughness = 0.45;
-  bannerMat.emissiveColor = new BABYLON.Color3(0.1, 0.25, 0.55);
+  bannerMat.albedoColor = new BABYLON.Color3(0.90, 0.88, 0.85);  // 浅色底板
+  bannerMat.metallic = 0;
+  bannerMat.roughness = 0.7;
+  bannerMat.emissiveColor = new BABYLON.Color3(0.05, 0.05, 0.05);
   banner.material = bannerMat;
   hallMeshes.push(banner);
 
   // 标语牌发光边框
   const bannerBorderMat = new BABYLON.StandardMaterial('banner-border', scene);
-  bannerBorderMat.emissiveColor = new BABYLON.Color3(0, 0.55, 0.95);
+  bannerBorderMat.emissiveColor = new BABYLON.Color3(0.10, 0.32, 0.47);  // 品牌蓝
   [
     { w: bannerW + 0.16, h: 0.08, x: 0, y: bannerH / 2 + 0.04 },
     { w: bannerW + 0.16, h: 0.08, x: 0, y: -(bannerH / 2 + 0.04) },
