@@ -61,6 +61,48 @@
           "description": "数据安全事件的应急响应流程：发现→研判→遏制→根除→恢复→总结。",
           "image": "assets/posters/poster-006.jpg",
           "notes": "建议：制定数据安全应急预案，组建应急响应团队，定期开展应急演练。"
+        },
+        {
+          "id": "poster-007",
+          "title": "网络安全防护体系",
+          "description": "企业网络安全防护体系架构设计：边界防护、入侵检测、态势感知、安全运营中心(SOC)。",
+          "image": "assets/posters/poster-007.jpg",
+          "notes": "建议：建设纵深防御体系，部署SIEM系统，实现安全事件统一监控和响应。"
+        },
+        {
+          "id": "poster-008",
+          "title": "终端安全管理",
+          "description": "终端设备安全管控策略：补丁管理、防病毒、DLP、移动设备管理(MDM)。",
+          "image": "assets/posters/poster-008.jpg",
+          "notes": "建议：统一终端管理平台，强制补丁更新策略，部署终端DLP防止数据外泄。"
+        },
+        {
+          "id": "poster-009",
+          "title": "云安全最佳实践",
+          "description": "上云环境下的数据安全挑战与防护：云配置审计、CASB、数据加密、访问控制。",
+          "image": "assets/posters/poster-009.jpg",
+          "notes": "建议：实施云安全态势管理(CSPM)，启用云访问安全代理(CASB)，加密云端敏感数据。"
+        },
+        {
+          "id": "poster-010",
+          "title": "供应链安全",
+          "description": "第三方供应商和合作伙伴的数据安全风险管理：供应商评估、合同约束、持续监控。",
+          "image": "assets/posters/poster-010.jpg",
+          "notes": "建议：建立供应商安全评估机制，签署数据保护协议，定期审计第三方访问权限。"
+        },
+        {
+          "id": "poster-011",
+          "title": "安全意识培训要点",
+          "description": "全员安全意识培训核心内容：钓鱼识别、密码管理、社工防范、数据保护。",
+          "image": "assets/posters/poster-011.jpg",
+          "notes": "建议：每季度开展安全意识培训，模拟钓鱼测试，建立安全文化激励机制。"
+        },
+        {
+          "id": "poster-012",
+          "title": "数据安全治理框架",
+          "description": "企业数据安全治理整体框架：组织架构、制度体系、技术平台、运营机制。",
+          "image": "assets/posters/poster-012.jpg",
+          "notes": "建议：成立数据安全委员会，制定数据安全策略，建设统一数据安全治理平台。"
         }
       ]
     },
@@ -76,6 +118,13 @@
           "description": "数据安全评估服务全流程介绍：从需求分析、资产梳理、漏洞检测到报告输出的完整过程。",
           "src": "assets/videos/video-001.mp4",
           "poster": "assets/posters/poster-001.jpg"
+        },
+        {
+          "id": "video-002",
+          "title": "数据安全意识宣传片",
+          "description": "面向全体员工的数据安全意识宣传片：真实案例还原、安全威胁解读、防护措施演示。",
+          "src": "assets/videos/video-002.mp4",
+          "poster": "assets/posters/poster-011.jpg"
         }
       ]
     },
@@ -105,6 +154,20 @@
           "description": "面向全体员工的数据安全意识培训资料，包含常见威胁案例、防护要点和操作规范。",
           "type": "image",
           "src": "assets/docs/doc-003-placeholder.png"
+        },
+        {
+          "id": "doc-004",
+          "title": "漏洞扫描与渗透测试报告",
+          "description": "本次评估中漏洞扫描和渗透测试的详细技术报告，包含发现的漏洞清单、风险等级和修复建议。",
+          "type": "image",
+          "src": "assets/docs/doc-004-placeholder.png"
+        },
+        {
+          "id": "doc-005",
+          "title": "数据安全整改路线图",
+          "description": "基于评估发现制定的数据安全整改路线图，分短期、中期、长期三个阶段，明确责任人和时间节点。",
+          "type": "image",
+          "src": "assets/docs/doc-005-placeholder.png"
         }
       ]
     },

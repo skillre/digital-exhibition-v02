@@ -91,7 +91,7 @@ async function init() {
   // 色调映射
   pipeline.imageProcessing.toneMappingEnabled = true;
   pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-  pipeline.imageProcessing.exposure = 1.15;    // 自然曝光，不泛白
+  pipeline.imageProcessing.exposure = 1.25;
   pipeline.imageProcessing.contrast = 1.12;    // 适度对比度 → 层次感
   pipeline.imageProcessing.vignetteEnabled = true;
   pipeline.imageProcessing.vignetteWeight = 1.0;

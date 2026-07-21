@@ -4,14 +4,14 @@ export function setupLighting(scene, zones) {
 
   // ── 环境光 ──
   const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.4;  // 低环境光 → 保留阴影和层次
-  ambient.diffuse = new BABYLON.Color3(0.95, 0.95, 1.0);
-  ambient.groundColor = new BABYLON.Color3(0.25, 0.25, 0.28);
+  ambient.intensity = 0.55;
+  ambient.diffuse = new BABYLON.Color3(0.96, 0.97, 1.0);
+  ambient.groundColor = new BABYLON.Color3(0.30, 0.30, 0.32);
 
   // ── 中央大厅多个点光源（均匀照亮整个房间）──
   [[0, 3.5, 0], [0, 3.5, 6], [0, 3.5, -4], [-7, 3.5, 0], [7, 3.5, 0]].forEach(([x, y, z], i) => {
     const pl = new BABYLON.PointLight(`center-${i}`, new BABYLON.Vector3(x, y, z), scene);
-    pl.intensity = i === 0 ? 2.0 : 1.5;  // 强中心灯 → 高光和反射
+    pl.intensity = i === 0 ? 2.0 : 1.4;
     pl.diffuse = new BABYLON.Color3(0.95, 0.96, 1.0);
     pl.range = 18;
   });
@@ -26,7 +26,7 @@ export function setupLighting(scene, zones) {
         new BABYLON.Vector3(0, -1, 0.3),
         Math.PI / 4, 2, scene
       );
-      spot.intensity = 3.0;  // 强射灯 → 海报高光+阴影
+      spot.intensity = 2.8;
       spot.diffuse = new BABYLON.Color3(1.0, 0.97, 0.92);
       spot.range = 6;
     }
@@ -39,6 +39,7 @@ export function setupLighting(scene, zones) {
     Math.PI / 3, 1.5, scene
   );
   screenSpot.intensity = 1.2;
+  screenSpot.diffuse = new BABYLON.Color3(0.96, 0.97, 1.0);
   screenSpot.diffuse = new BABYLON.Color3(0.9, 0.93, 1.0);
   screenSpot.range = 10;
 
@@ -52,6 +53,7 @@ export function setupLighting(scene, zones) {
         scene
       );
       pl.intensity = 1.2;
+      pl.diffuse = new BABYLON.Color3(1.0, 0.97, 0.92);
       pl.diffuse = new BABYLON.Color3(1.0, 0.95, 0.85);
       pl.range = 5;
     }
@@ -62,6 +64,7 @@ export function setupLighting(scene, zones) {
     new BABYLON.Vector3(-10, 3.0, 0), scene
   );
   bannerLight.intensity = 1.6;
+  bannerLight.diffuse = new BABYLON.Color3(1.0, 0.95, 0.88);
   bannerLight.diffuse = new BABYLON.Color3(1.0, 0.92, 0.75);
   bannerLight.range = 8;
 

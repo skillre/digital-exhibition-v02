@@ -108,34 +108,40 @@ export function createHall(scene) {
     hallMeshes.push(m);
   }
 
-  // ── 北墙：海报展板（6 块）──
-  const boardW = 2.0, boardH = 1.4, boardGap = 0.3;
-  const totalBoardW = 6 * boardW + 5 * boardGap;
+  // ── 北墙：海报展板（12 块，上下两排）──
+  const boardW = 1.5, boardH_upper = 1.2, boardH_lower = 1.0, boardGap = 0.2;
+  const boardsPerRow = 6;
+  const totalBoardW = boardsPerRow * boardW + (boardsPerRow - 1) * boardGap;
   const boardStartX = -totalBoardW / 2 + boardW / 2;
   const boards = [];
-  for (let i = 0; i < 6; i++) {
-    const board = BABYLON.MeshBuilder.CreatePlane(`poster-board-${i}`, {
-      width: boardW, height: boardH
-    }, scene);
-    board.position = new BABYLON.Vector3(
-      boardStartX + i * (boardW + boardGap),
-      2.0,
-      HALF_D - 0.15
-    );
-    board.rotation.y = Math.PI; // 面向房间内部
-    board.material = createBoardMaterial(scene, `board-mat-${i}`);
-    board.isPickable = true;
-    boards.push(board);
-    hallMeshes.push(board);
+  for (let row = 0; row < 2; row++) {
+    const isUpper = row === 0;
+    const bH = isUpper ? boardH_upper : boardH_lower;
+    const bY = isUpper ? 2.8 : 1.4;
+    for (let i = 0; i < boardsPerRow; i++) {
+      const board = BABYLON.MeshBuilder.CreatePlane(`poster-board-${row}-${i}`, {
+        width: boardW, height: bH
+      }, scene);
+      board.position = new BABYLON.Vector3(
+        boardStartX + i * (boardW + boardGap),
+        bY,
+        HALF_D - 0.15
+      );
+      board.rotation.y = Math.PI;
+      board.material = createBoardMaterial(scene, `board-mat-${row}-${i}`);
+      board.isPickable = true;
+      boards.push(board);
+      hallMeshes.push(board);
+    }
   }
 
-  // ── 东墙：视频大屏 ──
+  // ── 东墙：主视频大屏 ──
   const screenW = 6, screenH = 3.4;
   const screen = BABYLON.MeshBuilder.CreatePlane('video-screen', {
     width: screenW, height: screenH
   }, scene);
   screen.position = new BABYLON.Vector3(HALF_W - 0.15, 2.4, 0);
-  screen.rotation.y = Math.PI / 2; // 面向房间内部
+  screen.rotation.y = Math.PI / 2;
   const screenMat = new BABYLON.PBRMaterial('screen-pbr', scene);
   screenMat.albedoColor = new BABYLON.Color3(0.15, 0.18, 0.28);
   screenMat.metallic = 0.3;
@@ -145,7 +151,7 @@ export function createHall(scene) {
   screen.isPickable = true;
   hallMeshes.push(screen);
 
-  // 屏幕边框
+  // 东墙屏幕边框
   const borderMat = createMetalMaterial(scene, 'screen-border', new BABYLON.Color3(0.15, 0.18, 0.25));
   const bw = 0.1;
   [
@@ -157,6 +163,35 @@ export function createHall(scene) {
     const b = BABYLON.MeshBuilder.CreatePlane(`screen-border-${i}`, { width: s.w, height: s.h }, scene);
     b.position = new BABYLON.Vector3(s.x, s.y, -0.02);
     b.parent = screen;
+    b.material = borderMat;
+  });
+
+  // ── 南墙右侧：副视频屏 ──
+  const subScreenW = 3.5, subScreenH = 2.0;
+  const subScreen = BABYLON.MeshBuilder.CreatePlane('video-screen-sub', {
+    width: subScreenW, height: subScreenH
+  }, scene);
+  subScreen.position = new BABYLON.Vector3(7, 2.2, -HALF_D + 0.15);
+  subScreen.rotation.y = 0;
+  const subScreenMat = new BABYLON.PBRMaterial('screen-sub-pbr', scene);
+  subScreenMat.albedoColor = new BABYLON.Color3(0.15, 0.18, 0.28);
+  subScreenMat.metallic = 0.3;
+  subScreenMat.roughness = 0.4;
+  subScreenMat.emissiveColor = new BABYLON.Color3(0.08, 0.10, 0.18);
+  subScreen.material = subScreenMat;
+  subScreen.isPickable = true;
+  hallMeshes.push(subScreen);
+
+  // 副屏边框
+  [
+    { w: subScreenW + bw * 2, h: bw, x: 0, y: subScreenH / 2 + bw / 2 },
+    { w: subScreenW + bw * 2, h: bw, x: 0, y: -(subScreenH / 2 + bw / 2) },
+    { w: bw, h: subScreenH, x: -(subScreenW / 2 + bw / 2), y: 0 },
+    { w: bw, h: subScreenH, x: subScreenW / 2 + bw / 2, y: 0 },
+  ].forEach((s, i) => {
+    const b = BABYLON.MeshBuilder.CreatePlane(`sub-screen-border-${i}`, { width: s.w, height: s.h }, scene);
+    b.position = new BABYLON.Vector3(s.x, s.y, -0.02);
+    b.parent = subScreen;
     b.material = borderMat;
   });
 
@@ -190,18 +225,18 @@ export function createHall(scene) {
     b.material = bannerBorderMat;
   });
 
-  // ── 中央：文档展柜（3 个，一字排开）──
-  const showcaseW = 1.4, showcaseH = 1.0, showcaseD = 0.9;
-  const showcaseGap = 3.5;
+  // ── 中央：文档展柜（5 个，一字排开）──
+  const showcaseW = 1.2, showcaseH = 1.0, showcaseD = 0.9;
+  const showcaseGap = 2.5;
   const showcases = [];
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 5; i++) {
     const sc = BABYLON.MeshBuilder.CreateBox(`showcase-${i}`, {
       width: showcaseW, height: showcaseH, depth: showcaseD
     }, scene);
     sc.position = new BABYLON.Vector3(
-      -showcaseGap + i * showcaseGap,
+      -showcaseGap * 2 + i * showcaseGap,
       showcaseH / 2,
-      -1.5  // 稍偏南
+      -1.5
     );
     const mat = new BABYLON.PBRMaterial(`showcase-pbr-${i}`, scene);
     mat.albedoColor = new BABYLON.Color3(0.72, 0.75, 0.82);
@@ -238,7 +273,7 @@ export function createHall(scene) {
     id: 'video-zone', label: '评估成果视频',
     center: new BABYLON.Vector3(HALF_W - 2, 0, 0),
     size: { width: 4, depth: ROOM_D },
-    screens: [screen],
+    screens: [screen, subScreen],
     entry: new BABYLON.Vector3(HALF_W - 4, 1.7, 0),
   });
   zones.set('doc-zone', {
@@ -260,6 +295,7 @@ export function createHall(scene) {
   // 展品恢复可点击
   boards.forEach(b => b.isPickable = true);
   screen.isPickable = true;
+  subScreen.isPickable = true;
   showcases.forEach(s => s.isPickable = true);
 
   return { zones, hallMeshes };

@@ -98,7 +98,7 @@ function createFloorTexture(scene) {
   const ts = S / 8; // 256px 每块瓷砖
 
   // 基底色
-  ctx.fillStyle = '#b8bcc8';
+  ctx.fillStyle = '#C8CDD6';
   ctx.fillRect(0, 0, S, S);
 
   // 每块瓷砖微妙色差 + 抛光高光
@@ -172,7 +172,7 @@ function createWallTexture(scene) {
   const ctx = tex.getContext();
 
   // 基底色
-  ctx.fillStyle = '#d5d8e2';
+  ctx.fillStyle = '#E8ECF0';
   ctx.fillRect(0, 0, S, S);
 
   // 滚筒痕迹（竖向微条纹）
@@ -215,7 +215,7 @@ function createCeilingTexture(scene) {
   const tex = new BABYLON.DynamicTexture('ceil-dtex', S, scene, true);
   const ctx = tex.getContext();
 
-  ctx.fillStyle = '#dde0ea';
+  ctx.fillStyle = '#F2F4F7';
   ctx.fillRect(0, 0, S, S);
 
   // 方格吊顶接缝
@@ -254,7 +254,7 @@ function createMetalTexture(scene) {
   const tex = new BABYLON.DynamicTexture('metal-dtex', S, scene, false);
   const ctx = tex.getContext();
 
-  ctx.fillStyle = '#b0b5c2';
+  ctx.fillStyle = '#C8CCD6';
   ctx.fillRect(0, 0, S, S);
 
   // 拉丝纹理（水平方向）
