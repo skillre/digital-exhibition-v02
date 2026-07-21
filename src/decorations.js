@@ -175,28 +175,28 @@ export function addDecorations(scene, hallInfo) {
   const holoBaseMat = new BABYLON.StandardMaterial('hb', scene);
   holoBaseMat.diffuseColor = new BABYLON.Color3(0.2, 0.3, 0.5); holoBaseMat.emissiveColor = new BABYLON.Color3(0, 0.4, 0.85);
   const base = BABYLON.MeshBuilder.CreateCylinder('hbase', { diameter: 2.5, height: 0.1, tessellation: 32 }, scene);
-  base.position = new BABYLON.Vector3(0, 0.05, 2); base.material = holoBaseMat;
+  base.position = new BABYLON.Vector3(0, 0.05, 7); base.material = holoBaseMat;
 
   const oRing = BABYLON.MeshBuilder.CreateTorus('hor', { diameter: 3.0, thickness: 0.07, tessellation: 48 }, scene);
-  oRing.position = new BABYLON.Vector3(0, 0.01, 2);
+  oRing.position = new BABYLON.Vector3(0, 0.01, 7);
   const orM = new BABYLON.StandardMaterial('orm', scene); orM.emissiveColor = new BABYLON.Color3(0, 0.5, 1.0); oRing.material = orM;
 
   const iRing = BABYLON.MeshBuilder.CreateTorus('hir', { diameter: 1.8, thickness: 0.05, tessellation: 48 }, scene);
-  iRing.position = new BABYLON.Vector3(0, 0.01, 2);
+  iRing.position = new BABYLON.Vector3(0, 0.01, 7);
   const irM = new BABYLON.StandardMaterial('irm', scene); irM.emissiveColor = new BABYLON.Color3(0, 0.83, 1.0); iRing.material = irM;
 
   const pillar = BABYLON.MeshBuilder.CreateCylinder('hp', { diameter: 1.2, height: 2.5, tessellation: 24 }, scene);
-  pillar.position = new BABYLON.Vector3(0, 1.25, 2);
+  pillar.position = new BABYLON.Vector3(0, 1.25, 7);
   const pM = new BABYLON.StandardMaterial('hpm', scene);
   pM.diffuseColor = new BABYLON.Color3(0.15, 0.45, 0.75); pM.emissiveColor = new BABYLON.Color3(0, 0.4, 0.85);
   pM.alpha = 0.25; pM.backFaceCulling = false; pillar.material = pM;
 
   const s1 = BABYLON.MeshBuilder.CreateTorus('hs1', { diameter: 1.6, thickness: 0.04, tessellation: 48 }, scene);
-  s1.position = new BABYLON.Vector3(0, 2.0, 2); s1.rotation.x = Math.PI / 6;
+  s1.position = new BABYLON.Vector3(0, 2.0, 7); s1.rotation.x = Math.PI / 6;
   const s1m = new BABYLON.StandardMaterial('s1m', scene); s1m.emissiveColor = new BABYLON.Color3(0, 0.75, 1.0); s1.material = s1m;
 
   const s2 = BABYLON.MeshBuilder.CreateTorus('hs2', { diameter: 1.9, thickness: 0.03, tessellation: 48 }, scene);
-  s2.position = new BABYLON.Vector3(0, 0.8, 2); s2.rotation.x = -Math.PI / 5;
+  s2.position = new BABYLON.Vector3(0, 0.8, 7); s2.rotation.x = -Math.PI / 5;
   const s2m = new BABYLON.StandardMaterial('s2m', scene); s2m.emissiveColor = new BABYLON.Color3(0.27, 0.53, 1.0); s2.material = s2m;
 
   scene.onBeforeRenderObservable.add(() => { s1.rotation.y += 0.008; s2.rotation.y -= 0.005; oRing.rotation.y += 0.002; iRing.rotation.y -= 0.003; });

@@ -92,10 +92,10 @@ export async function createExhibits(scene, content, hallInfo) {
 
         // 将文档内容作为纹理贴到全息屏上
         try {
-          const tex = new BABYLON.Texture(item.src, scene, false, false, undefined, () => {
+          const tex = new BABYLON.Texture(item.src, scene, false, true, undefined, () => {
             const mat = screen.material.clone(`holo-doc-mat-${item.id}`);
             mat.diffuseTexture = tex;
-            mat.emissiveColor = new BABYLON.Color3(0.15, 0.35, 0.65);
+            mat.emissiveColor = new BABYLON.Color3(0.05, 0.15, 0.30);
             screen.material = mat;
           });
         } catch (e) {

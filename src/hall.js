@@ -241,7 +241,7 @@ export function createHall(scene) {
     const holoMat = new BABYLON.StandardMaterial(`holo-mat-${i}`, scene);
     holoMat.diffuseColor = new BABYLON.Color3(0, 0.35, 0.7);
     holoMat.emissiveColor = new BABYLON.Color3(0, 0.45, 0.85);
-    holoMat.alpha = 0.65;
+    holoMat.alpha = 0.85;
     holoMat.backFaceCulling = false;
     hs.material = holoMat;
     hs.isPickable = true;
