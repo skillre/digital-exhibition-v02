@@ -22,11 +22,11 @@ export function setupCamera(scene, canvas, hallInfo) {
   // 初始朝向：面向北方（海报区方向）
   camera.setTarget(new BABYLON.Vector3(startPos.x, 1.4, startPos.z + 5));
 
-  // ── 碰撞检测 ──
+  // ── 碰撞检测（不使用重力，直接固定高度）──
   camera.checkCollisions = true;
-  camera.applyGravity = true;
-  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.7, 0.5);
-  camera.ellipsoidOffset = new BABYLON.Vector3(0, -0.7, 0);
+  camera.applyGravity = false;
+  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.8, 0.5);
+  camera.ellipsoidOffset = new BABYLON.Vector3(0, 0, 0);
 
   // ── 移动参数 ──
   camera.speed = 0.45;              // 移动速度
