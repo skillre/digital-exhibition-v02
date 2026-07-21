@@ -74,7 +74,7 @@ function createFloorTexture(scene) {
   const ctx = tex.getContext();
 
   // 深色基底
-  ctx.fillStyle = '#1A1C23';
+  ctx.fillStyle = '#2A3040';
   ctx.fillRect(0, 0, S, S);
 
   // 大块瓷砖网格（浅色凹槽）
@@ -139,7 +139,7 @@ function createWallTexture(scene) {
   const ctx = tex.getContext();
 
   // 深色基底
-  ctx.fillStyle = '#282E38';
+  ctx.fillStyle = '#1E2430';
   ctx.fillRect(0, 0, S, S);
 
   // 面板网格（2列×4行面板）
@@ -215,7 +215,7 @@ function createCeilingTexture(scene) {
   const ctx = tex.getContext();
 
   // 深灰基底
-  ctx.fillStyle = '#15171C';
+  ctx.fillStyle = '#161A24';
   ctx.fillRect(0, 0, S, S);
 
   // 方形网格骨架（金属条）

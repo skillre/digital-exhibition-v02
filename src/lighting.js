@@ -4,9 +4,9 @@ export function setupLighting(scene, zones) {
 
   // ── 环境光 ──
   const ambient = new BABYLON.HemisphericLight('ambient', new BABYLON.Vector3(0, 1, 0), scene);
-  ambient.intensity = 0.25;  // 更暗的背景
+  ambient.intensity = 0.38;
   ambient.diffuse = new BABYLON.Color3(0.95, 0.96, 1.0);
-  ambient.groundColor = new BABYLON.Color3(0.08, 0.08, 0.10);
+  ambient.groundColor = new BABYLON.Color3(0.12, 0.13, 0.18);
 
   // ── 中央大厅多个点光源（均匀照亮整个房间）──
   [[0, 3.5, 0], [0, 3.5, 6], [0, 3.5, -4], [-7, 3.5, 0], [7, 3.5, 0]].forEach(([x, y, z], i) => {
