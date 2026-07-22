@@ -9,6 +9,14 @@ import {
 const MODEL_PATH = 'assets/models/';
 const MODEL_FILE = 'VR-Art-Gallery-Lobby-Baked.glb';
 
+// ── 模型方向调整（弧度）──
+// 如果模型朝向不对，修改这里的 Y 轴旋转值
+// 0 = 不旋转, Math.PI/2 = 90°, Math.PI = 180°, -Math.PI/2 = -90°
+const MODEL_ROTATION_Y = 0;
+
+// ── 调试模式：显示坐标轴和边界框 ──
+const DEBUG_AXES = true;
+
 // ── 展品挂载点配置（根据 GLB 房间布局微调）──
 // 这些位置在模型加载后会根据实际包围盒自动调整
 const EXHIBIT_CONFIG = {
@@ -93,6 +101,17 @@ export async function createHall(scene) {
 
     roomMeshes.push(mesh);
     hallMeshes.push(mesh);
+  }
+
+  // ── 应用模型旋转 ──
+  if (MODEL_ROTATION_Y !== 0) {
+    rootMesh.rotation.y = MODEL_ROTATION_Y;
+    console.log(`[展厅] 模型旋转: ${(MODEL_ROTATION_Y * 180 / Math.PI).toFixed(0)}°`);
+  }
+
+  // ── 调试：显示坐标轴 ──
+  if (DEBUG_AXES) {
+    createDebugAxes(scene, roomMeshes);
   }
 
   // ═══════════════════════════════════════
@@ -372,4 +391,82 @@ function computeSceneBounds(meshes) {
   }
 
   return { minX, minY, minZ, maxX, maxY, maxZ };
+}
+
+/**
+ * 创建调试坐标轴和边界框可视化
+ */
+function createDebugAxes(scene, roomMeshes) {
+  const bounds = computeSceneBounds(roomMeshes);
+  const centerX = (bounds.maxX + bounds.minX) / 2;
+  const centerZ = (bounds.maxZ + bounds.minZ) / 2;
+  const size = Math.max(
+    bounds.maxX - bounds.minX,
+    bounds.maxZ - bounds.minZ
+  ) * 0.6;
+
+  // X 轴（红色）- 东/西方向
+  const xAxis = BABYLON.MeshBuilder.CreateBox('debug-x', { width: size, height: 0.05, depth: 0.05 }, scene);
+  xAxis.position = new BABYLON.Vector3(centerX, 0.05, centerZ);
+  const xMat = new BABYLON.StandardMaterial('debug-x-mat', scene);
+  xMat.emissiveColor = new BABYLON.Color3(1, 0, 0);
+  xMat.disableLighting = true;
+  xAxis.material = xMat;
+  xAxis.isPickable = false;
+
+  // Z 轴（蓝色）- 南/北方向
+  const zAxis = BABYLON.MeshBuilder.CreateBox('debug-z', { width: 0.05, height: 0.05, depth: size }, scene);
+  zAxis.position = new BABYLON.Vector3(centerX, 0.05, centerZ);
+  const zMat = new BABYLON.StandardMaterial('debug-z-mat', scene);
+  zMat.emissiveColor = new BABYLON.Color3(0, 0, 1);
+  zMat.disableLighting = true;
+  zAxis.material = zMat;
+  zAxis.isPickable = false;
+
+  // 边界框（绿色线框）
+  const boxW = bounds.maxX - bounds.minX;
+  const boxD = bounds.maxZ - bounds.minZ;
+  const box = BABYLON.MeshBuilder.CreateBox('debug-box', { width: boxW, height: 0.02, depth: boxD }, scene);
+  box.position = new BABYLON.Vector3(centerX, 0.01, centerZ);
+  const boxMat = new BABYLON.StandardMaterial('debug-box-mat', scene);
+  boxMat.emissiveColor = new BABYLON.Color3(0, 1, 0);
+  boxMat.wireframe = true;
+  boxMat.disableLighting = true;
+  box.material = boxMat;
+  box.isPickable = false;
+
+  // 方向标记（4个角的标签位置）
+  const markerPositions = [
+    { pos: [bounds.maxX, 1, centerZ], label: 'X+ (东)', color: [1, 0.5, 0] },
+    { pos: [bounds.minX, 1, centerZ], label: 'X- (西)', color: [1, 0.5, 0] },
+    { pos: [centerX, 1, bounds.maxZ], label: 'Z+ (北)', color: [0, 0.5, 1] },
+    { pos: [centerX, 1, bounds.minZ], label: 'Z- (南)', color: [0, 0.5, 1] },
+  ];
+
+  markerPositions.forEach(({ pos, label, color }, i) => {
+    const marker = BABYLON.MeshBuilder.CreateSphere(`debug-marker-${i}`, { diameter: 0.3 }, scene);
+    marker.position = new BABYLON.Vector3(...pos);
+    const mat = new BABYLON.StandardMaterial(`debug-marker-mat-${i}`, scene);
+    mat.emissiveColor = new BABYLON.Color3(...color);
+    mat.disableLighting = true;
+    marker.material = mat;
+    marker.isPickable = false;
+  });
+
+  // 控制台输出方向说明
+  console.log('\n════════════════════════════════════════');
+  console.log('[调试] 展厅方向坐标系:');
+  console.log(`  X+ (东墙): ${bounds.maxX.toFixed(1)}`);
+  console.log(`  X- (西墙): ${bounds.minX.toFixed(1)}`);
+  console.log(`  Z+ (北墙): ${bounds.maxZ.toFixed(1)}`);
+  console.log(`  Z- (南墙/入口): ${bounds.minZ.toFixed(1)}`);
+  console.log(`  房间中心: (${centerX.toFixed(1)}, ${centerZ.toFixed(1)})`);
+  console.log('────────────────────────────────────────');
+  console.log('[调试] 请观察:');
+  console.log('  红色线 = X轴 (东/西)');
+  console.log('  蓝色线 = Z轴 (南/北)');
+  console.log('  绿色框 = 房间边界');
+  console.log('  橙色球 = 东/西标记');
+  console.log('  蓝色球 = 南/北标记');
+  console.log('════════════════════════════════════════\n');
 }
