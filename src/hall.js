@@ -67,17 +67,25 @@ export async function createHall(scene) {
   // 1. 加载 GLB 模型
   // ═══════════════════════════════════════
   console.log('[展厅] 开始加载 GLB 模型...');
-  const result = await BABYLON.SceneLoader.ImportMeshAsync(
-    '', MODEL_PATH, MODEL_FILE, scene,
-    (evt) => {
-      if (evt.lengthComputable) {
-        const pct = Math.round((evt.loaded / evt.total) * 100);
-        console.log(`[展厅] 模型加载: ${pct}%`);
-      }
-    }
-  );
+  console.log('[展厅] 模型路径:', MODEL_PATH + MODEL_FILE);
 
-  console.log(`[展厅] GLB 加载完成, mesh 数量: ${result.meshes.length}`);
+  let result;
+  try {
+    result = await BABYLON.SceneLoader.ImportMeshAsync(
+      '', MODEL_PATH, MODEL_FILE, scene,
+      (evt) => {
+        if (evt.lengthComputable) {
+          const pct = Math.round((evt.loaded / evt.total) * 100);
+          console.log(`[展厅] 模型加载进度: ${pct}%`);
+        }
+      }
+    );
+    console.log(`[展厅] GLB 加载成功! mesh 数量: ${result.meshes.length}`);
+  } catch (err) {
+    console.error('[展厅] GLB 加载失败:', err);
+    console.error('[展厅] 请检查文件路径和格式是否正确');
+    throw err;
+  }
 
   // ═══════════════════════════════════════
   // 2. 处理加载的 mesh

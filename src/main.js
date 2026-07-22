@@ -46,8 +46,19 @@ async function init() {
   tracker.setProgress(40, '正在加载展厅模型...');
 
   // ── 加载 GLB 展厅模型 + 创建展品挂载点 ──
+  console.log('[main] 准备加载 hall.js...');
   const { createHall } = await import('./hall.js');
-  const hallInfo = await createHall(scene);
+  console.log('[main] hall.js 已加载, 开始 createHall...');
+
+  let hallInfo;
+  try {
+    hallInfo = await createHall(scene);
+    console.log('[main] createHall 完成, zones:', hallInfo.zones.size, '个');
+  } catch (err) {
+    console.error('[main] createHall 失败:', err);
+    console.error('[main] 错误堆栈:', err.stack);
+    throw err;
+  }
 
   // 移除临时灯光
   scene.getLightByName('temp-light')?.dispose();
