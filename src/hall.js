@@ -383,9 +383,10 @@ export async function createHall(scene) {
     h.base.freezeWorldMatrix(); h.ring.freezeWorldMatrix();
   });
 
-  // ── 检测地板 Y 坐标 ──
-  const floorY = detectFloorY(roomMeshes, bounds);
-  console.log(`[展厅] 检测到地板 Y 坐标: ${floorY.toFixed(2)}`);
+  // ── 计算地板 Y 坐标（使用 bounds 最小 Y + 偏移）──
+  // 注意：由于模型旋转，bounds 可能未及时更新，直接使用最小 Y 更可靠
+  const floorY = bounds.minY + 0.1;  // 加小偏移避免相机卡在地面
+  console.log(`[展厅] 地板 Y 坐标: ${floorY.toFixed(2)} (bounds minY: ${bounds.minY.toFixed(2)})`);
 
   console.log('[展厅] 展区创建完成');
 
@@ -492,45 +493,3 @@ function createDebugAxes(scene, roomMeshes) {
   console.log('════════════════════════════════════════\n');
 }
 
-/**
- * 检测 GLB 模型的地板 Y 坐标
- * 方法：找到 Y 坐标最低且水平范围最大的 mesh，即为地板
- */
-function detectFloorY(meshes, bounds) {
-  // 策略1：查找名称中包含 floor/ground/Floor/Ground 的 mesh
-  for (const mesh of meshes) {
-    const name = mesh.name.toLowerCase();
-    if (name.includes('floor') || name.includes('ground') || name.includes('底') || name.includes('地面')) {
-      const bb = mesh.getBoundingInfo().boundingBox;
-      const floorY = bb.maximumWorld.y;  // 地板上表面
-      console.log(`[地板检测] 找到地板 mesh: "${mesh.name}", Y=${floorY.toFixed(2)}`);
-      return floorY;
-    }
-  }
-
-  // 策略2：找到 Y 最小的 mesh（可能是地板）
-  let lowestMesh = null;
-  let lowestY = Infinity;
-  for (const mesh of meshes) {
-    const bb = mesh.getBoundingInfo().boundingBox;
-    const meshMinY = bb.minimumWorld.y;
-    // 只考虑水平范围较大的 mesh（排除小装饰物）
-    const width = bb.maximumWorld.x - bb.minimumWorld.x;
-    const depth = bb.maximumWorld.z - bb.minimumWorld.z;
-    if (width > 2 && depth > 2 && meshMinY < lowestY) {
-      lowestY = meshMinY;
-      lowestMesh = mesh;
-    }
-  }
-
-  if (lowestMesh) {
-    const bb = lowestMesh.getBoundingInfo().boundingBox;
-    const floorY = bb.maximumWorld.y;  // 地板上表面
-    console.log(`[地板检测] 使用最低 mesh: "${lowestMesh.name}", Y=${floorY.toFixed(2)}`);
-    return floorY;
-  }
-
-  // 策略3：使用 bounds 的最小 Y + 小偏移
-  console.log('[地板检测] 未找到地板 mesh，使用 bounds minY');
-  return bounds.minY + 0.05;
-}
