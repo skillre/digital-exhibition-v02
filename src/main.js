@@ -1,6 +1,5 @@
 // src/main.js — 数字展厅应用入口
-// Phase 1: 引擎初始化 + 基础场景
-// Phase 2+: 导入 hall/camera/content/exhibits/ui 模块
+// 使用 GLB 模型作为展厅空间
 
 import { isMobile, createLoadingTracker } from './utils.js';
 
@@ -25,98 +24,83 @@ async function init() {
     antialias: true,
   });
 
-  tracker.setProgress(30, '正在创建场景...');
+  tracker.setProgress(25, '正在创建场景...');
 
   const scene = new BABYLON.Scene(engine);
-  scene.clearColor = new BABYLON.Color4(0.10, 0.12, 0.16, 1);  // 深色背景匹配暗墙
+  scene.clearColor = new BABYLON.Color4(0.05, 0.06, 0.08, 1);  // 深色背景
   scene.ambientColor = new BABYLON.Color3(0.15, 0.15, 0.18);
 
   // ── 环境贴图（PBR 反射的核心）──
   const envTexture = BABYLON.CubeTexture.CreateFromPrefilteredData('lib/environment.env', scene);
   scene.environmentTexture = envTexture;
-  scene.environmentIntensity = 1.0;  // PBR 材质主要光源
+  scene.environmentIntensity = 0.8;  // 略降低，避免烘焙模型过亮
 
   // 发光层
   const glowLayer = new BABYLON.GlowLayer('glow', scene, { mainTextureFixedSize: 512 });
-  glowLayer.intensity = 0.5;
+  glowLayer.intensity = 0.4;
 
-  // ── Phase 1 临时灯光（Phase 2 替换）──
-  const light = new BABYLON.HemisphericLight('temp-light', new BABYLON.Vector3(0, 1, 0), scene);
-  light.intensity = 0.6;
+  // ── 临时灯光（GLB 加载后替换）──
+  const tempLight = new BABYLON.HemisphericLight('temp-light', new BABYLON.Vector3(0, 1, 0), scene);
+  tempLight.intensity = 0.6;
 
-  // Phase 2 创建展厅后，Phase 3 替换相机
-  let cameraCtrl = null;
+  tracker.setProgress(40, '正在加载展厅模型...');
 
-  // 临时地板占位（Phase 2 构建展厅后移除）
-  const tempGround = BABYLON.MeshBuilder.CreateGround('temp-ground', { width: 50, height: 50 }, scene);
-  tempGround.material = new BABYLON.StandardMaterial('temp-ground-mat', scene);
-  tempGround.material.diffuseColor = new BABYLON.Color3(0.08, 0.09, 0.12);
-
-  tracker.setProgress(50, '正在构建展厅空间...');
-
-  // ── Phase 2: 展厅几何体 + 灯光 ──
+  // ── 加载 GLB 展厅模型 + 创建展品挂载点 ──
   const { createHall } = await import('./hall.js');
-  const { setupLighting } = await import('./lighting.js');
-  const hallInfo = createHall(scene);
-  setupLighting(scene, hallInfo.zones);
+  const hallInfo = await createHall(scene);
 
-  // 移除临时地板和灯光
-  scene.getMeshByName('temp-ground')?.dispose();
+  // 移除临时灯光
   scene.getLightByName('temp-light')?.dispose();
 
-  // ── 装饰系统（立柱/灯带/地板标记/拱门/全息/粒子）──
-  const { addDecorations } = await import('./decorations.js');
-  const decoMeshes = addDecorations(scene, hallInfo);
-  // 冻结装饰 mesh 的世界矩阵
-  decoMeshes.forEach(m => { m.freezeWorldMatrix(); m.isPickable = false; });
+  tracker.setProgress(60, '正在配置灯光...');
+
+  // ── 灯光系统（针对烘焙模型调低强度）──
+  const { setupLighting } = await import('./lighting.js');
+  setupLighting(scene, hallInfo.zones);
 
   tracker.setProgress(65, '正在配置漫游相机...');
 
-  // ── Phase 3: 第一人称相机 ──
+  // ── 第一人称相机 ──
   const { setupCamera } = await import('./camera.js');
-  cameraCtrl = setupCamera(scene, canvas, hallInfo);
-
-  // 移除临时相机
-  scene.getCameraByName('temp-cam')?.dispose();
+  const cameraCtrl = setupCamera(scene, canvas, hallInfo);
 
   // ── 后期处理管线 ──
   const pipeline = new BABYLON.DefaultRenderingPipeline('pipeline', true, scene, [cameraCtrl.camera]);
   pipeline.samples = 4;
   pipeline.fxaaEnabled = true;
   pipeline.bloomEnabled = true;
-  pipeline.bloomThreshold = 0.35;
-  pipeline.bloomWeight = 0.3;
+  pipeline.bloomThreshold = 0.4;
+  pipeline.bloomWeight = 0.25;
   pipeline.bloomKernel = 64;
   pipeline.bloomScale = 0.5;
   // 色调映射
   pipeline.imageProcessing.toneMappingEnabled = true;
   pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-  pipeline.imageProcessing.exposure = 1.5;
+  pipeline.imageProcessing.exposure = 1.2;   // 烘焙模型降低曝光
   pipeline.imageProcessing.contrast = 1.05;
   pipeline.imageProcessing.vignetteEnabled = true;
   pipeline.imageProcessing.vignetteWeight = 1.0;
   pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
   pipeline.imageProcessing.vignetteStretch = 0.5;
 
-  // ── 锐化（通过 DefaultRenderingPipeline 内置）──
+  // ── 锐化 ──
   if (pipeline.sharpenEnabled !== undefined) {
     pipeline.sharpenEnabled = true;
     pipeline.sharpen.edgeAmount = 0.3;
     pipeline.sharpen.colorAmount = 1.0;
   }
 
-  // ── SSAO2（屏幕空间环境光遮蔽 → 接触阴影）──
+  // ── SSAO2 ──
   const ssao = new BABYLON.SSAO2RenderingPipeline('ssao', scene, { ssaoRatio: 0.5, blurRatio: 0.5 });
   ssao.radius = 2.5;
-  ssao.totalStrength = 0.5;
+  ssao.totalStrength = 0.4;  // 烘焙模型降低 SSAO 强度
   ssao.base = 0.05;
   ssao.samples = 16;
   ssao.maxZ = 100;
   ssao.minZAspect = 0.5;
   scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', cameraCtrl.camera);
 
-  // ── 多光源阴影 ──
-  const floor = scene.getMeshByName('floor');
+  // ── 阴影（仅对展品 mesh）──
   const shadowLights = ['poster-spot-0', 'poster-spot-1', 'poster-spot-2'];
   for (const lightName of shadowLights) {
     const light = scene.getLightByName(lightName);
@@ -126,28 +110,15 @@ async function init() {
     sg.filteringQuality = BABYLON.ShadowGenerator.QUALITY_LOW;
     sg.darkness = 0.5;
     scene.meshes.forEach(m => {
-      if (m.name.includes('poster-board') || m.name.includes('poster-lightbar') || m.name.includes('showcase-') || m.name.includes('col-')) {
+      if (m.name.includes('poster-board') || m.name.includes('showcase-')) {
         sg.addShadowCaster(m);
       }
     });
   }
-  if (floor) floor.receiveShadows = true;
-
-  // ── 地板平面反射（MirrorTexture）──
-  if (floor) {
-    const mirror = new BABYLON.MirrorTexture('floor-mirror', 512, scene, true);
-    mirror.mirrorPlane = new BABYLON.Plane(0, -1, 0, 0);
-    mirror.renderList = scene.meshes.filter(m =>
-      m.name.includes('col-') || m.name.includes('poster-board') || m.name.includes('holo-screen') || m.name.includes('holo-base') || m.name.includes('hp') || m.name.includes('icon-')
-    );
-    mirror.level = 0.08;  // 柔和镜面反射
-    mirror.adaptiveBlurKernel = 64;  // 更模糊的反射
-    floor.material.reflectionTexture = mirror;
-  }
 
   tracker.setProgress(75, '正在加载展品内容...');
 
-  // ── Phase 4: 内容加载 + 展品创建 ──
+  // ── 内容加载 + 展品创建 ──
   const { loadContent } = await import('./content-loader.js');
   const { createExhibits } = await import('./exhibits.js');
   let content, exhibits;
@@ -162,14 +133,10 @@ async function init() {
 
   tracker.setProgress(85, '正在初始化交互界面...');
 
-  // ── Phase 5: UI 系统 + 视频播放器 + 拾取 ──
+  // ── UI 系统 ──
   const { setupUI } = await import('./ui.js');
   const ui = setupUI(content, exhibits, cameraCtrl);
-
-  // 设置焦点交互系统（十字准星 + 高亮 + 详情面板）
   ui.setupCrosshair(scene);
-
-  // ── Phase 6: 导航菜单 ──
   ui.createNavMenu(hallInfo);
 
   tracker.setProgress(95, '准备就绪...');
@@ -187,8 +154,6 @@ async function init() {
   // 暴露到全局供调试
   window.__exhibition = { engine, scene, hallInfo, cameraCtrl };
 }
-
-
 
 // ── 启动 ──
 init().catch(err => {
