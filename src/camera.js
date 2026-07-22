@@ -21,9 +21,9 @@ export function setupCamera(scene, canvas, hallInfo) {
   //
   // 相机应在房间中心附近
   const centerX = (-16.5 + 14.1) / 2;  // = -1.2
-  const centerZ = (-15.4 + 15.4) / 2;  // = 0
+  const startZ = -10;  // 往后一点，靠近南墙
 
-  let startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, centerZ);
+  let startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, startZ);
   console.log(`[相机] 起始位置: (${startPos.x.toFixed(1)}, ${startPos.y.toFixed(1)}, ${startPos.z.toFixed(1)})`);
   console.log(`[相机] 地板Y=${floorY}, 眼高=${eyeHeight}`);
 
@@ -35,7 +35,7 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.maxZ = 200;
 
   // 初始朝向：面向北墙（Z 正方向）
-  camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, 15));
+  camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, startPos.z + 15));
 
   // ── 碰撞检测 ──
   camera.checkCollisions = true;
@@ -58,9 +58,11 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.keysUpward = [];
   camera.keysDownward = [];
 
-  // ── 锁定水平视角 ──
+  // ── 锁定水平视角 + 锁定高度（防止碰撞系统把相机往下推）──
+  const lockedY = floorY + eyeHeight;
   scene.onBeforeRenderObservable.add(() => {
     camera.rotation.x = 0;
+    camera.position.y = lockedY;  // 强制锁定高度，防止下沉
   });
 
   camera.attachControl(canvas, false);
