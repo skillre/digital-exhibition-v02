@@ -91,43 +91,47 @@ export async function createHall(scene) {
   }
 
   // ═══════════════════════════════════════
-  // 2. 处理加载的 mesh
+  // 2. 处理加载的 mesh（手动创建父节点并重新挂载）
   // ═══════════════════════════════════════
-  // 找到模型的根节点（__root__）
-  let rootNode = result.meshes.find(m => m.name === '__root__');
-  if (!rootNode) {
-    rootNode = result.meshes[0];  // 如果没有 __root__，用第一个 mesh
-  }
-  console.log(`[展厅] 根节点: "${rootNode.name}", 位置: (${rootNode.position.x.toFixed(2)}, ${rootNode.position.y.toFixed(2)}, ${rootNode.position.z.toFixed(2)})`);
+  // 创建新的父节点用于控制旋转
+  const roomRoot = new BABYLON.TransformNode('room-root', scene);
+  console.log('[展厅] 创建父节点: room-root');
 
   const roomMeshes = [];
 
   for (const mesh of result.meshes) {
+    // 跳过 __root__ TransformNode
+    if (mesh.name === '__root__') continue;
+
     // 设置碰撞
     mesh.checkCollisions = true;
     mesh.isPickable = false;
     mesh.receiveShadows = true;
 
+    // 重新挂载到 roomRoot
+    mesh.parent = roomRoot;
+
     roomMeshes.push(mesh);
     hallMeshes.push(mesh);
   }
+  console.log(`[展厅] 重新挂载 ${roomMeshes.length} 个 mesh 到 roomRoot`);
 
-  // ── 应用模型旋转（直接旋转根节点）──
+  // ── 应用模型旋转（旋转新的父节点）──
   if (MODEL_ROTATION_X !== 0) {
-    rootNode.rotation.x = MODEL_ROTATION_X;
+    roomRoot.rotation.x = MODEL_ROTATION_X;
     console.log(`[展厅] 模型X轴旋转: ${(MODEL_ROTATION_X * 180 / Math.PI).toFixed(0)}°`);
   }
   if (MODEL_ROTATION_Y !== 0) {
-    rootNode.rotation.y = MODEL_ROTATION_Y;
+    roomRoot.rotation.y = MODEL_ROTATION_Y;
     console.log(`[展厅] 模型Y轴旋转: ${(MODEL_ROTATION_Y * 180 / Math.PI).toFixed(0)}°`);
   }
   if (MODEL_ROTATION_Z !== 0) {
-    rootNode.rotation.z = MODEL_ROTATION_Z;
+    roomRoot.rotation.z = MODEL_ROTATION_Z;
     console.log(`[展厅] 模型Z轴旋转: ${(MODEL_ROTATION_Z * 180 / Math.PI).toFixed(0)}°`);
   }
 
   // ── 强制更新世界矩阵（确保旋转生效后再计算 bounds）──
-  rootNode.computeWorldMatrix(true);
+  roomRoot.computeWorldMatrix(true);
   roomMeshes.forEach(m => m.computeWorldMatrix(true));
   console.log('[展厅] 世界矩阵已更新');
 
