@@ -143,8 +143,8 @@ export async function createHall(scene) {
   // ═══════════════════════════════════════
   // 3. 计算房间包围盒，自动缩放到合适尺寸
   // ═══════════════════════════════════════
-  console.log(`[展厅] 根节点旋转后位置: (${rootNode.position.x.toFixed(2)}, ${rootNode.position.y.toFixed(2)}, ${rootNode.position.z.toFixed(2)})`);
-  console.log(`[展厅] 根节点旋转: (${(rootNode.rotation.x * 180 / Math.PI).toFixed(0)}°, ${(rootNode.rotation.y * 180 / Math.PI).toFixed(0)}°, ${(rootNode.rotation.z * 180 / Math.PI).toFixed(0)}°)`);
+  console.log(`[展厅] roomRoot 旋转后位置: (${roomRoot.position.x.toFixed(2)}, ${roomRoot.position.y.toFixed(2)}, ${roomRoot.position.z.toFixed(2)})`);
+  console.log(`[展厅] roomRoot 旋转: (${(roomRoot.rotation.x * 180 / Math.PI).toFixed(0)}°, ${(roomRoot.rotation.y * 180 / Math.PI).toFixed(0)}°, ${(roomRoot.rotation.z * 180 / Math.PI).toFixed(0)}°)`);
 
   let bounds = computeSceneBounds(roomMeshes);
   console.log('[展厅] 旋转后包围盒:', JSON.stringify(bounds));
