@@ -12,8 +12,8 @@ const MODEL_FILE = 'VR-Art-Gallery-Lobby-Baked.glb';
 // ── 模型方向调整（弧度）──
 // 如果模型朝向不对，修改这里的旋转值
 // 0 = 不旋转, Math.PI/2 = 90°, Math.PI = 180°, -Math.PI/2 = -90°
-// X轴逆时针旋转 90°
-const MODEL_ROTATION_X = Math.PI / 2;  // +90° 逆时针旋转
+// X轴顺时针旋转 -90°（修正上下颠倒）
+const MODEL_ROTATION_X = -Math.PI / 2;  // -90° 顺时针旋转
 const MODEL_ROTATION_Y = 0;
 const MODEL_ROTATION_Z = 0;
 
