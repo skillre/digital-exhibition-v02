@@ -20,9 +20,9 @@ export function setupCamera(scene, canvas, hallInfo) {
   // 原始 Z: -4.1 ~ 5.6 → 旋转后 Y: -4.1 ~ 5.6
   //
   // 相机应在房间中心附近
-  const centerX = 5.38;   // 用户定位的初始位置
-  const startZ = -0.16;   // 用户定位的初始位置
-  const startYaw = -92.0;  // 用户定位的初始朝向（度）
+  const centerX = 2.98;   // 用户定位的初始位置
+  const startZ = -0.05;   // 用户定位的初始位置
+  const startYaw = 90.2;  // 用户定位的初始朝向（度）
 
   let startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, startZ);
   console.log(`[相机] 起始位置: (${startPos.x.toFixed(2)}, ${startPos.y.toFixed(2)}, ${startPos.z.toFixed(2)})`);
@@ -56,10 +56,35 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.keysUpward = [];
   camera.keysDownward = [];
 
-  // ── 锁定高度（不锁定视角，允许上下看）──
+  // ── 锁定高度 + 射线检测墙体碰撞 ──
   const lockedY = floorY + eyeHeight;
+  const CHECK_DIST = 0.6;  // 前方检测距离
+  const ray = new BABYLON.Ray();
+  const lastValidPos = startPos.clone();
+
   scene.onBeforeRenderObservable.add(() => {
-    camera.position.y = lockedY;  // 强制锁定高度，防止下沉
+    // 锁定高度
+    camera.position.y = lockedY;
+
+    // 射线检测：从相机向移动方向发射，如果碰到墙则回退到上次安全位置
+    const forward = camera.getForwardRay().direction;
+    ray.origin = camera.position.clone();
+    ray.direction = forward;
+    ray.length = CHECK_DIST;
+
+    const hit = scene.pickWithRay(ray, (mesh) => {
+      return mesh.checkCollisions && mesh.isPickable === false && !mesh.name.includes('poster-board') && !mesh.name.includes('video-screen') && !mesh.name.includes('holo-');
+    });
+
+    if (hit.hit) {
+      // 碰到墙，回退到上次安全位置
+      camera.position.x = lastValidPos.x;
+      camera.position.z = lastValidPos.z;
+    } else {
+      // 没碰墙，更新安全位置
+      lastValidPos.x = camera.position.x;
+      lastValidPos.z = camera.position.z;
+    }
   });
 
   camera.attachControl(canvas, false);
