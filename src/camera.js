@@ -11,18 +11,17 @@
 export function setupCamera(scene, canvas, hallInfo) {
   // ── 根据 GLB 模型 bounds 和地板高度计算起始位置 ──
   const bounds = hallInfo.bounds;
-  const floorY = hallInfo.floorY || 0;  // 从 hall.js 获取检测到的地板 Y
+  const floorY = hallInfo.floorY || 0;  // 从 hall.js 获取地板 Y
   const eyeHeight = 1.6;  // 眼睛离地高度
 
-  let startPos;
-  if (bounds) {
-    const centerX = (bounds.maxX + bounds.minX) / 2;
-    const startZ = bounds.minZ + 3;  // 靠近入口（南墙）
-    startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, startZ);
-    console.log(`[相机] 起始位置: Y=${startPos.y.toFixed(2)} (地板Y=${floorY.toFixed(2)} + 眼高${eyeHeight})`);
-  } else {
-    startPos = new BABYLON.Vector3(0, eyeHeight, -6);
-  }
+  // 使用原始模型尺寸计算位置（bounds 旋转后可能不准确）
+  // 原始模型: X: -16.5~14.1, Y: -15.4~15.4 (旋转后变成 Z)
+  const centerX = (-16.5 + 14.1) / 2;  // = -1.2
+  const startZ = -15.4 + 3;  // = -12.4，靠近南墙
+
+  let startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, startZ);
+  console.log(`[相机] 起始位置: (${startPos.x.toFixed(1)}, ${startPos.y.toFixed(1)}, ${startPos.z.toFixed(1)})`);
+  console.log(`[相机] 地板Y=${floorY}, 眼高=${eyeHeight}`);
 
   const camera = new BABYLON.UniversalCamera('fps-cam', startPos, scene);
 
@@ -31,13 +30,8 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.minZ = 0.1;
   camera.maxZ = 200;
 
-  // 初始朝向：面向房间内部（北方向）
-  if (bounds) {
-    const centerX = (bounds.maxX + bounds.minX) / 2;
-    camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, startPos.z + 10));
-  } else {
-    camera.setTarget(new BABYLON.Vector3(startPos.x, startPos.y, startPos.z + 5));
-  }
+  // 初始朝向：面向房间内部（北方向，Z 正方向）
+  camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, startPos.z + 10));
 
   // ── 碰撞检测 ──
   camera.checkCollisions = true;
