@@ -14,12 +14,16 @@ export function setupCamera(scene, canvas, hallInfo) {
   const floorY = hallInfo.floorY || 0;  // 从 hall.js 获取地板 Y
   const eyeHeight = 1.6;  // 眼睛离地高度
 
-  // 使用原始模型尺寸计算位置（bounds 旋转后可能不准确）
-  // 原始模型: X: -16.5~14.1, Y: -15.4~15.4 (旋转后变成 Z)
+  // 旋转 -90° 后的正确坐标：
+  // 原始 X: -16.5 ~ 14.1 → 旋转后 X: -16.5 ~ 14.1 (不变)
+  // 原始 Y: -15.4 ~ 15.4 → 旋转后 Z: -15.4 ~ 15.4
+  // 原始 Z: -4.1 ~ 5.6 → 旋转后 Y: -4.1 ~ 5.6
+  //
+  // 相机应在房间中心附近
   const centerX = (-16.5 + 14.1) / 2;  // = -1.2
-  const startZ = -15.4 + 3;  // = -12.4，靠近南墙
+  const centerZ = (-15.4 + 15.4) / 2;  // = 0
 
-  let startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, startZ);
+  let startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, centerZ);
   console.log(`[相机] 起始位置: (${startPos.x.toFixed(1)}, ${startPos.y.toFixed(1)}, ${startPos.z.toFixed(1)})`);
   console.log(`[相机] 地板Y=${floorY}, 眼高=${eyeHeight}`);
 
@@ -30,8 +34,8 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.minZ = 0.1;
   camera.maxZ = 200;
 
-  // 初始朝向：面向房间内部（北方向，Z 正方向）
-  camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, startPos.z + 10));
+  // 初始朝向：面向北墙（Z 正方向）
+  camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, 15));
 
   // ── 碰撞检测 ──
   camera.checkCollisions = true;
