@@ -20,12 +20,13 @@ export function setupCamera(scene, canvas, hallInfo) {
   // 原始 Z: -4.1 ~ 5.6 → 旋转后 Y: -4.1 ~ 5.6
   //
   // 相机应在房间中心附近
-  const centerX = (-16.5 + 14.1) / 2;  // = -1.2
-  const startZ = -10;  // 往后一点，靠近南墙
+  const centerX = 5.38;   // 用户定位的初始位置
+  const startZ = -0.16;   // 用户定位的初始位置
+  const startYaw = -92.0;  // 用户定位的初始朝向（度）
 
   let startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, startZ);
-  console.log(`[相机] 起始位置: (${startPos.x.toFixed(1)}, ${startPos.y.toFixed(1)}, ${startPos.z.toFixed(1)})`);
-  console.log(`[相机] 地板Y=${floorY}, 眼高=${eyeHeight}`);
+  console.log(`[相机] 起始位置: (${startPos.x.toFixed(2)}, ${startPos.y.toFixed(2)}, ${startPos.z.toFixed(2)})`);
+  console.log(`[相机] 地板Y=${floorY}, 眼高=${eyeHeight}, 朝向=${startYaw}°`);
 
   const camera = new BABYLON.UniversalCamera('fps-cam', startPos, scene);
 
@@ -34,8 +35,8 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.minZ = 0.1;
   camera.maxZ = 200;
 
-  // 初始朝向：面向北墙（Z 正方向）
-  camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, startPos.z + 15));
+  // 初始朝向：用户定位的 -92°
+  camera.rotation.y = startYaw * Math.PI / 180;
 
   // ── 碰撞检测：关闭相机碰撞（法线方向错误会阻止移动）──
   // 改用渲染循环锁定 Y + 射线检测墙体
@@ -55,13 +56,10 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.keysUpward = [];
   camera.keysDownward = [];
 
-  // ── 锁定水平视角 + 锁定高度 + 墙体碰撞检测 ──
+  // ── 锁定高度（不锁定视角，允许上下看）──
   const lockedY = floorY + eyeHeight;
-  const moveDir = new BABYLON.Vector3();
-  const ray = new BABYLON.Ray();
   scene.onBeforeRenderObservable.add(() => {
-    camera.rotation.x = 0;
-    camera.position.y = lockedY;  // 强制锁定高度
+    camera.position.y = lockedY;  // 强制锁定高度，防止下沉
   });
 
   camera.attachControl(canvas, false);
