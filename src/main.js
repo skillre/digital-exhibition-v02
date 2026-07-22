@@ -30,14 +30,14 @@ async function init() {
   scene.clearColor = new BABYLON.Color4(0.05, 0.06, 0.08, 1);  // 深色背景
   scene.ambientColor = new BABYLON.Color3(0.15, 0.15, 0.18);
 
-  // ── 环境贴图（PBR 反射的核心）──
+  // ── 环境贴图：降低强度，让烘焙纹理主导 ──
   const envTexture = BABYLON.CubeTexture.CreateFromPrefilteredData('lib/environment.env', scene);
   scene.environmentTexture = envTexture;
-  scene.environmentIntensity = 0.8;  // 略降低，避免烘焙模型过亮
+  scene.environmentIntensity = 0.3;  // 大幅降低，避免影响烘焙效果
 
-  // 发光层
+  // 发光层：极低强度
   const glowLayer = new BABYLON.GlowLayer('glow', scene, { mainTextureFixedSize: 512 });
-  glowLayer.intensity = 0.4;
+  glowLayer.intensity = 0.15;
 
   // ── 临时灯光（GLB 加载后替换）──
   const tempLight = new BABYLON.HemisphericLight('temp-light', new BABYLON.Vector3(0, 1, 0), scene);
@@ -75,57 +75,27 @@ async function init() {
   const { setupCamera } = await import('./camera.js');
   const cameraCtrl = setupCamera(scene, canvas, hallInfo);
 
-  // ── 后期处理管线 ──
+  // ── 后期处理：仅保留抗锯齿，关闭其他效果以还原烘焙模型原始外观 ──
   const pipeline = new BABYLON.DefaultRenderingPipeline('pipeline', true, scene, [cameraCtrl.camera]);
   pipeline.samples = 4;
   pipeline.fxaaEnabled = true;
-  pipeline.bloomEnabled = true;
-  pipeline.bloomThreshold = 0.4;
-  pipeline.bloomWeight = 0.25;
-  pipeline.bloomKernel = 64;
-  pipeline.bloomScale = 0.5;
-  // 色调映射
-  pipeline.imageProcessing.toneMappingEnabled = true;
-  pipeline.imageProcessing.toneMappingType = BABYLON.ImageProcessingConfiguration.TONEMAPPING_ACES;
-  pipeline.imageProcessing.exposure = 1.2;   // 烘焙模型降低曝光
-  pipeline.imageProcessing.contrast = 1.05;
-  pipeline.imageProcessing.vignetteEnabled = true;
-  pipeline.imageProcessing.vignetteWeight = 1.0;
-  pipeline.imageProcessing.vignetteColor = new BABYLON.Color4(0, 0, 0, 0);
-  pipeline.imageProcessing.vignetteStretch = 0.5;
 
-  // ── 锐化 ──
+  // 关闭 Bloom
+  pipeline.bloomEnabled = false;
+
+  // 关闭色调映射和曝光调整，保持原始颜色
+  pipeline.imageProcessing.toneMappingEnabled = false;
+  pipeline.imageProcessing.exposure = 1.0;   // 不调整曝光
+  pipeline.imageProcessing.contrast = 1.0;   // 不调整对比度
+  pipeline.imageProcessing.vignetteEnabled = false;
+
+  // 关闭锐化
   if (pipeline.sharpenEnabled !== undefined) {
-    pipeline.sharpenEnabled = true;
-    pipeline.sharpen.edgeAmount = 0.3;
-    pipeline.sharpen.colorAmount = 1.0;
+    pipeline.sharpenEnabled = false;
   }
 
-  // ── SSAO2 ──
-  const ssao = new BABYLON.SSAO2RenderingPipeline('ssao', scene, { ssaoRatio: 0.5, blurRatio: 0.5 });
-  ssao.radius = 2.5;
-  ssao.totalStrength = 0.4;  // 烘焙模型降低 SSAO 强度
-  ssao.base = 0.05;
-  ssao.samples = 16;
-  ssao.maxZ = 100;
-  ssao.minZAspect = 0.5;
-  scene.postProcessRenderPipelineManager.attachCamerasToRenderPipeline('ssao', cameraCtrl.camera);
-
-  // ── 阴影（仅对展品 mesh）──
-  const shadowLights = ['poster-spot-0', 'poster-spot-1', 'poster-spot-2'];
-  for (const lightName of shadowLights) {
-    const light = scene.getLightByName(lightName);
-    if (!light) continue;
-    const sg = new BABYLON.ShadowGenerator(512, light);
-    sg.usePercentageCloserFiltering = true;
-    sg.filteringQuality = BABYLON.ShadowGenerator.QUALITY_LOW;
-    sg.darkness = 0.5;
-    scene.meshes.forEach(m => {
-      if (m.name.includes('poster-board') || m.name.includes('showcase-')) {
-        sg.addShadowCaster(m);
-      }
-    });
-  }
+  // 关闭 SSAO
+  // （不创建 SSAO 管线，完全依赖烘焙光照）
 
   tracker.setProgress(75, '正在加载展品内容...');
 
