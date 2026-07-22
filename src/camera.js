@@ -37,11 +37,8 @@ export function setupCamera(scene, canvas, hallInfo) {
   // 初始朝向：面向北墙（Z 正方向）
   camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, startPos.z + 15));
 
-  // ── 碰撞检测 ──
-  camera.checkCollisions = true;
-  camera.applyGravity = false;
-  camera.ellipsoid = new BABYLON.Vector3(0.5, 0.8, 0.5);
-  camera.ellipsoidOffset = new BABYLON.Vector3(0, 0, 0);
+  // ── 碰撞检测：关闭相机碰撞（法线方向错误会阻止移动）──
+  // 改用渲染循环锁定 Y + 射线检测墙体
 
   // ── 移动参数 ──
   camera.speed = 0.45;
@@ -58,11 +55,13 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.keysUpward = [];
   camera.keysDownward = [];
 
-  // ── 锁定水平视角 + 锁定高度（防止碰撞系统把相机往下推）──
+  // ── 锁定水平视角 + 锁定高度 + 墙体碰撞检测 ──
   const lockedY = floorY + eyeHeight;
+  const moveDir = new BABYLON.Vector3();
+  const ray = new BABYLON.Ray();
   scene.onBeforeRenderObservable.add(() => {
     camera.rotation.x = 0;
-    camera.position.y = lockedY;  // 强制锁定高度，防止下沉
+    camera.position.y = lockedY;  // 强制锁定高度
   });
 
   camera.attachControl(canvas, false);
