@@ -23,7 +23,7 @@ export function setupCamera(scene, canvas, hallInfo) {
   const camera = new BABYLON.UniversalCamera('fps-cam', startPos, scene);
 
   // ── 视角参数 ──
-  camera.fov = 1.3;          // 75° 视场角
+  camera.fov = 1.0;          // ~57° 视场角，减少边缘拉伸变形
   camera.minZ = 0.1;
   camera.maxZ = 200;
 

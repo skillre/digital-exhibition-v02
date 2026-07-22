@@ -372,14 +372,16 @@ export async function createHall(scene) {
   });
 
   // ═══════════════════════════════════════
-  // 6. 冻结静态 mesh
+  // 6. 冻结静态 mesh（GLB mesh 不冻结，保留碰撞检测能力）
   // ═══════════════════════════════════════
-  hallMeshes.forEach(m => { m.freezeWorldMatrix(); });
-  // 展品恢复可点击
-  boards.forEach(b => b.isPickable = true);
-  screen.isPickable = true;
-  subScreen.isPickable = true;
-  holoScreens.forEach(h => h.screen.isPickable = true);
+  // 只冻结展品 mesh，不冻结 GLB 房间 mesh（冻结会导致碰撞失效）
+  boards.forEach(b => { b.freezeWorldMatrix(); b.isPickable = true; });
+  screen.freezeWorldMatrix(); screen.isPickable = true;
+  subScreen.freezeWorldMatrix(); subScreen.isPickable = true;
+  holoScreens.forEach(h => {
+    h.screen.freezeWorldMatrix(); h.screen.isPickable = true;
+    h.base.freezeWorldMatrix(); h.ring.freezeWorldMatrix();
+  });
 
   console.log('[展厅] 展区创建完成');
 
