@@ -9,15 +9,19 @@
  * @returns {{ camera, teleportTo, lock, unlock, isLocked }}
  */
 export function setupCamera(scene, canvas, hallInfo) {
-  // ── 根据 GLB 模型 bounds 计算起始位置 ──
+  // ── 根据 GLB 模型 bounds 和地板高度计算起始位置 ──
   const bounds = hallInfo.bounds;
+  const floorY = hallInfo.floorY || 0;  // 从 hall.js 获取检测到的地板 Y
+  const eyeHeight = 1.6;  // 眼睛离地高度
+
   let startPos;
   if (bounds) {
     const centerX = (bounds.maxX + bounds.minX) / 2;
     const startZ = bounds.minZ + 3;  // 靠近入口（南墙）
-    startPos = new BABYLON.Vector3(centerX, 1.4, startZ);
+    startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, startZ);
+    console.log(`[相机] 起始位置: Y=${startPos.y.toFixed(2)} (地板Y=${floorY.toFixed(2)} + 眼高${eyeHeight})`);
   } else {
-    startPos = new BABYLON.Vector3(0, 1.4, -6);
+    startPos = new BABYLON.Vector3(0, eyeHeight, -6);
   }
 
   const camera = new BABYLON.UniversalCamera('fps-cam', startPos, scene);
@@ -30,9 +34,9 @@ export function setupCamera(scene, canvas, hallInfo) {
   // 初始朝向：面向房间内部（北方向）
   if (bounds) {
     const centerX = (bounds.maxX + bounds.minX) / 2;
-    camera.setTarget(new BABYLON.Vector3(centerX, 1.4, startPos.z + 10));
+    camera.setTarget(new BABYLON.Vector3(centerX, startPos.y, startPos.z + 10));
   } else {
-    camera.setTarget(new BABYLON.Vector3(startPos.x, 1.4, startPos.z + 5));
+    camera.setTarget(new BABYLON.Vector3(startPos.x, startPos.y, startPos.z + 5));
   }
 
   // ── 碰撞检测 ──
@@ -94,7 +98,7 @@ export function setupCamera(scene, canvas, hallInfo) {
   // ── 传送功能 ──
   function teleportTo(position) {
     camera.checkCollisions = false;
-    camera.position = new BABYLON.Vector3(position.x, 1.4, position.z);
+    camera.position = new BABYLON.Vector3(position.x, floorY + eyeHeight, position.z);
     setTimeout(() => { camera.checkCollisions = true; }, 100);
   }
 
