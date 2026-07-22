@@ -111,6 +111,17 @@ export function setupCamera(scene, canvas, hallInfo) {
     }
   });
 
+  // ── P 键输出当前位置和朝向（用于定位初始视角）──
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'p' || e.key === 'P') {
+      const pos = camera.position;
+      const rot = camera.rotation;
+      // 计算朝向向量
+      const dir = camera.getForwardRay().direction;
+      console.log(`%c[位置] X=${pos.x.toFixed(2)} Y=${pos.y.toFixed(2)} Z=${pos.z.toFixed(2)} | [旋转] X=${(rot.x*180/Math.PI).toFixed(1)}° Y=${(rot.y*180/Math.PI).toFixed(1)}° Z=${(rot.z*180/Math.PI).toFixed(1)}° | [朝向] dx=${dir.x.toFixed(2)} dy=${dir.y.toFixed(2)} dz=${dir.z.toFixed(2)}`, 'color:#00ff88;font-size:14px;font-weight:bold');
+    }
+  });
+
   return {
     camera,
     teleportTo,
