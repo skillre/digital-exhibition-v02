@@ -12,10 +12,10 @@ const MODEL_FILE = 'VR-Art-Gallery-Lobby-Baked.glb';
 // ── 模型方向调整（弧度）──
 // 如果模型朝向不对，修改这里的旋转值
 // 0 = 不旋转, Math.PI/2 = 90°, Math.PI = 180°, -Math.PI/2 = -90°
-// X轴旋转：修正模型“竖起来”的问题（Blender Y-up → Babylon Z-up）
-const MODEL_ROTATION_X = -Math.PI / 2;  // -90° 让模型躺平
-// Y轴旋转：修正左右方向（屋顶在左、地板在右 → 旋转 90°）
-const MODEL_ROTATION_Y = Math.PI / 2;  // 90° 修正左右方向
+// 尝试绕 Z 轴旋转 -90°（可能更适合这个模型）
+const MODEL_ROTATION_X = 0;
+const MODEL_ROTATION_Y = 0;
+const MODEL_ROTATION_Z = -Math.PI / 2;  // -90° 绕 Z 轴旋转
 
 // ── 调试模式：显示坐标轴和边界框 ──
 const DEBUG_AXES = true;
@@ -120,6 +120,10 @@ export async function createHall(scene) {
   if (MODEL_ROTATION_Y !== 0) {
     rootNode.rotation.y = MODEL_ROTATION_Y;
     console.log(`[展厅] 模型Y轴旋转: ${(MODEL_ROTATION_Y * 180 / Math.PI).toFixed(0)}°`);
+  }
+  if (MODEL_ROTATION_Z !== 0) {
+    rootNode.rotation.z = MODEL_ROTATION_Z;
+    console.log(`[展厅] 模型Z轴旋转: ${(MODEL_ROTATION_Z * 180 / Math.PI).toFixed(0)}°`);
   }
 
   // ── 强制更新世界矩阵（确保旋转生效后再计算 bounds）──
