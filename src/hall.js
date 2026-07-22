@@ -13,7 +13,7 @@ const MODEL_FILE = 'VR-Art-Gallery-Lobby-Baked.glb';
 // 如果模型朝向不对，修改这里的旋转值
 // 0 = 不旋转, Math.PI/2 = 90°, Math.PI = 180°, -Math.PI/2 = -90°
 // X轴旋转：修正模型“竖起来”的问题（Blender Y-up → Babylon Z-up）
-const MODEL_ROTATION_X = Math.PI / 2;  // +90° 让模型躺平（修正上下颠倒）
+const MODEL_ROTATION_X = -Math.PI / 2;  // -90° 让模型躺平
 // Y轴旋转：修正入口方向（如果入口朝向不对，调整这个值）
 const MODEL_ROTATION_Y = 0;
 
@@ -138,13 +138,14 @@ export async function createHall(scene) {
   // 3. 计算房间包围盒，自动缩放到合适尺寸
   // ═══════════════════════════════════════
   let bounds = computeSceneBounds(roomMeshes);
-  console.log('[展厅] 原始包围盒:', JSON.stringify(bounds));
+  console.log('[展厅] 旋转后包围盒:', JSON.stringify(bounds));
 
   let roomW = bounds.maxX - bounds.minX;
   let roomD = bounds.maxZ - bounds.minZ;
   let roomH = bounds.maxY - bounds.minY;
 
-  console.log(`[展厅] 原始尺寸: W=${roomW.toFixed(1)} D=${roomD.toFixed(1)} H=${roomH.toFixed(1)}`);
+  console.log(`[展厅] 旋转后尺寸: W=${roomW.toFixed(1)} D=${roomD.toFixed(1)} H=${roomH.toFixed(1)}`);
+  console.log(`[展厅] Y轴范围: ${bounds.minY.toFixed(2)} ~ ${bounds.maxY.toFixed(2)}`);
 
   // 自动缩放：使最大维度约为 25m（匹配展品尺寸）
   const TARGET_SIZE = 25;
@@ -389,9 +390,11 @@ export async function createHall(scene) {
   });
 
   // ── 计算地板 Y 坐标（使用 bounds 最小 Y + 偏移）──
-  // 注意：由于模型旋转，bounds 可能未及时更新，直接使用最小 Y 更可靠
   const floorY = bounds.minY + 0.1;  // 加小偏移避免相机卡在地面
-  console.log(`[展厅] 地板 Y 坐标: ${floorY.toFixed(2)} (bounds minY: ${bounds.minY.toFixed(2)})`);
+  const eyeHeight = 1.6;
+  console.log(`[展厅] 地板 Y 坐标: ${floorY.toFixed(2)}`);
+  console.log(`[展厅] 相机起始 Y: ${(floorY + eyeHeight).toFixed(2)}`);
+  console.log(`[展厅] bounds Y 范围: ${bounds.minY.toFixed(2)} ~ ${bounds.maxY.toFixed(2)}`);
 
   console.log('[展厅] 展区创建完成');
 
