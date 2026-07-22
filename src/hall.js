@@ -390,13 +390,11 @@ export async function createHall(scene) {
   });
 
   // ── 计算地板 Y 坐标 ──
-  // 原始模型 Z 范围是 -4.1 到 5.6，旋转 -90° 后 Z 变成 Y
-  // 地板应该在 Y = -4.1 附近，但实际可能有偏差
-  // 使用原始 Z 最小值作为地板高度
-  const floorY = -4.1;  // 基于原始模型尺寸的地板高度
+  // 尝试使用 Y=0 作为地板高度（模型可能以地面为原点）
+  const floorY = 0;
   const eyeHeight = 1.6;
-  console.log(`[展厅] 地板 Y 坐标: ${floorY.toFixed(2)} (基于原始模型尺寸)`);
-  console.log(`[展厅] 相机起始 Y: ${(floorY + eyeHeight).toFixed(2)}`);
+  console.log(`[展厅] 地板 Y 坐标: ${floorY} (尝试 Y=0)`);
+  console.log(`[展厅] 相机起始 Y: ${floorY + eyeHeight}`);
   console.log(`[展厅] bounds Y 范围: ${bounds.minY.toFixed(2)} ~ ${bounds.maxY.toFixed(2)}`);
 
   console.log('[展厅] 展区创建完成');
