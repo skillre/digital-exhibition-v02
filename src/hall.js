@@ -14,8 +14,8 @@ const MODEL_FILE = 'VR-Art-Gallery-Lobby-Baked.glb';
 // 0 = 不旋转, Math.PI/2 = 90°, Math.PI = 180°, -Math.PI/2 = -90°
 // X轴旋转：修正模型“竖起来”的问题（Blender Y-up → Babylon Z-up）
 const MODEL_ROTATION_X = -Math.PI / 2;  // -90° 让模型躺平
-// Y轴旋转：修正入口方向（如果入口朝向不对，调整这个值）
-const MODEL_ROTATION_Y = 0;
+// Y轴旋转：修正左右方向（屋顶在左、地板在右 → 旋转 90°）
+const MODEL_ROTATION_Y = Math.PI / 2;  // 90° 修正左右方向
 
 // ── 调试模式：显示坐标轴和边界框 ──
 const DEBUG_AXES = true;
