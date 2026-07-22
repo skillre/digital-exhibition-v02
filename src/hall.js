@@ -124,6 +124,11 @@ export async function createHall(scene) {
     console.log(`[展厅] 模型Y轴旋转: ${(MODEL_ROTATION_Y * 180 / Math.PI).toFixed(0)}°`);
   }
 
+  // ── 强制更新世界矩阵（确保旋转生效后再计算 bounds）──
+  rootMesh.computeWorldMatrix(true);
+  roomMeshes.forEach(m => m.computeWorldMatrix(true));
+  console.log('[展厅] 世界矩阵已更新');
+
   // ── 调试：显示坐标轴 ──
   if (DEBUG_AXES) {
     createDebugAxes(scene, roomMeshes);
