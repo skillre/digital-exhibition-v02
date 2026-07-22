@@ -93,39 +93,37 @@ export async function createHall(scene) {
   // ═══════════════════════════════════════
   // 2. 处理加载的 mesh
   // ═══════════════════════════════════════
-  const rootMesh = new BABYLON.TransformNode('room-root', scene);
+  // 找到模型的根节点（__root__）
+  let rootNode = result.meshes.find(m => m.name === '__root__');
+  if (!rootNode) {
+    rootNode = result.meshes[0];  // 如果没有 __root__，用第一个 mesh
+  }
+  console.log(`[展厅] 根节点: "${rootNode.name}", 位置: (${rootNode.position.x.toFixed(2)}, ${rootNode.position.y.toFixed(2)}, ${rootNode.position.z.toFixed(2)})`);
+
   const roomMeshes = [];
 
   for (const mesh of result.meshes) {
-    // 跳过根节点（通常是 __root__）
-    if (mesh.name === '__root__') continue;
-
     // 设置碰撞
     mesh.checkCollisions = true;
     mesh.isPickable = false;
     mesh.receiveShadows = true;
 
-    // 父级挂到统一根节点
-    if (!mesh.parent || mesh.parent.name === '__root__') {
-      mesh.parent = rootMesh;
-    }
-
     roomMeshes.push(mesh);
     hallMeshes.push(mesh);
   }
 
-  // ── 应用模型旋转 ──
+  // ── 应用模型旋转（直接旋转根节点）──
   if (MODEL_ROTATION_X !== 0) {
-    rootMesh.rotation.x = MODEL_ROTATION_X;
+    rootNode.rotation.x = MODEL_ROTATION_X;
     console.log(`[展厅] 模型X轴旋转: ${(MODEL_ROTATION_X * 180 / Math.PI).toFixed(0)}°`);
   }
   if (MODEL_ROTATION_Y !== 0) {
-    rootMesh.rotation.y = MODEL_ROTATION_Y;
+    rootNode.rotation.y = MODEL_ROTATION_Y;
     console.log(`[展厅] 模型Y轴旋转: ${(MODEL_ROTATION_Y * 180 / Math.PI).toFixed(0)}°`);
   }
 
   // ── 强制更新世界矩阵（确保旋转生效后再计算 bounds）──
-  rootMesh.computeWorldMatrix(true);
+  rootNode.computeWorldMatrix(true);
   roomMeshes.forEach(m => m.computeWorldMatrix(true));
   console.log('[展厅] 世界矩阵已更新');
 
@@ -137,6 +135,9 @@ export async function createHall(scene) {
   // ═══════════════════════════════════════
   // 3. 计算房间包围盒，自动缩放到合适尺寸
   // ═══════════════════════════════════════
+  console.log(`[展厅] 根节点旋转后位置: (${rootNode.position.x.toFixed(2)}, ${rootNode.position.y.toFixed(2)}, ${rootNode.position.z.toFixed(2)})`);
+  console.log(`[展厅] 根节点旋转: (${(rootNode.rotation.x * 180 / Math.PI).toFixed(0)}°, ${(rootNode.rotation.y * 180 / Math.PI).toFixed(0)}°, ${(rootNode.rotation.z * 180 / Math.PI).toFixed(0)}°)`);
+
   let bounds = computeSceneBounds(roomMeshes);
   console.log('[展厅] 旋转后包围盒:', JSON.stringify(bounds));
 
@@ -145,7 +146,9 @@ export async function createHall(scene) {
   let roomH = bounds.maxY - bounds.minY;
 
   console.log(`[展厅] 旋转后尺寸: W=${roomW.toFixed(1)} D=${roomD.toFixed(1)} H=${roomH.toFixed(1)}`);
+  console.log(`[展厅] X轴范围: ${bounds.minX.toFixed(2)} ~ ${bounds.maxX.toFixed(2)}`);
   console.log(`[展厅] Y轴范围: ${bounds.minY.toFixed(2)} ~ ${bounds.maxY.toFixed(2)}`);
+  console.log(`[展厅] Z轴范围: ${bounds.minZ.toFixed(2)} ~ ${bounds.maxZ.toFixed(2)}`);
 
   // 自动缩放：使最大维度约为 25m（匹配展品尺寸）
   const TARGET_SIZE = 25;
