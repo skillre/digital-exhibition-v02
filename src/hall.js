@@ -408,6 +408,11 @@ export async function createHall(scene) {
   console.log(`[展厅] 相机起始 Y: ${floorY + eyeHeight}`);
   console.log(`[展厅] bounds Y 范围: ${bounds.minY.toFixed(2)} ~ ${bounds.maxY.toFixed(2)}`);
 
+  // ═══════════════════════════════════════
+  // 7. 加载前台模型
+  // ═══════════════════════════════════════
+  await loadReceptionDesk(scene, hallMeshes);
+
   console.log('[展厅] 展区创建完成');
 
   return { zones, hallMeshes, bounds, floorY };
@@ -511,5 +516,47 @@ function createDebugAxes(scene, roomMeshes) {
   console.log('  橙色球 = 东/西标记');
   console.log('  蓝色球 = 南/北标记');
   console.log('════════════════════════════════════════\n');
+}
+
+/**
+ * 加载前台模型
+ */
+async function loadReceptionDesk(scene, hallMeshes) {
+  const DESK_FILE = 'reception-desk.glb';
+  // 用户定位的位置和朝向
+  const DESK_X = 9.29;
+  const DESK_Y = 0;      // 地板高度
+  const DESK_Z = -0.06;
+  const DESK_YAW = -90.2;  // 朝向（度）
+
+  console.log('[前台] 开始加载前台模型...');
+  try {
+    const result = await BABYLON.SceneLoader.ImportMeshAsync(
+      '', 'assets/models/', DESK_FILE, scene
+    );
+    console.log(`[前台] 加载成功, mesh 数量: ${result.meshes.length}`);
+
+    // 创建父节点用于定位
+    const deskRoot = new BABYLON.TransformNode('desk-root', scene);
+    deskRoot.position = new BABYLON.Vector3(DESK_X, DESK_Y, DESK_Z);
+    deskRoot.rotation.y = DESK_YAW * Math.PI / 180;
+
+    for (const mesh of result.meshes) {
+      if (mesh.name === '__root__') continue;
+      mesh.parent = deskRoot;
+      mesh.checkCollisions = true;
+      mesh.isPickable = false;
+      mesh.receiveShadows = true;
+      hallMeshes.push(mesh);
+    }
+
+    // 强制更新世界矩阵
+    deskRoot.computeWorldMatrix(true);
+    result.meshes.forEach(m => m.computeWorldMatrix(true));
+
+    console.log(`[前台] 位置: (${DESK_X}, ${DESK_Y}, ${DESK_Z}), 朝向: ${DESK_YAW}°`);
+  } catch (err) {
+    console.error('[前台] 加载失败:', err);
+  }
 }
 
