@@ -586,6 +586,28 @@ async function loadReceptionDesk(scene, hallMeshes) {
     marker.isPickable = false;
 
     console.log(`[前台] 位置: (${DESK_X}, ${DESK_Y}, ${DESK_Z}), 朝向: ${DESK_YAW}°`);
+    console.log(`[前台] 调试控制: [+/-] 缩放 | [↑↓←→] 移动 | [1/3] 左右旋转 | [P] 输出当前数值`);
+
+    // ── 前台调试控制 ──
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '+' || e.key === '=') {
+        deskRoot.scaling.scaleInPlace(1.1);
+        console.log(`[前台] 缩放: ${deskRoot.scaling.x.toFixed(4)}x`);
+      }
+      if (e.key === '-' || e.key === '_') {
+        deskRoot.scaling.scaleInPlace(0.9);
+        console.log(`[前台] 缩放: ${deskRoot.scaling.x.toFixed(4)}x`);
+      }
+      if (e.key === 'ArrowUp') { deskRoot.position.z += 0.2; marker.position.z += 0.2; console.log(`[前台] Z=${deskRoot.position.z.toFixed(2)}`); e.preventDefault(); }
+      if (e.key === 'ArrowDown') { deskRoot.position.z -= 0.2; marker.position.z -= 0.2; console.log(`[前台] Z=${deskRoot.position.z.toFixed(2)}`); e.preventDefault(); }
+      if (e.key === 'ArrowLeft') { deskRoot.position.x -= 0.2; marker.position.x -= 0.2; console.log(`[前台] X=${deskRoot.position.x.toFixed(2)}`); e.preventDefault(); }
+      if (e.key === 'ArrowRight') { deskRoot.position.x += 0.2; marker.position.x += 0.2; console.log(`[前台] X=${deskRoot.position.x.toFixed(2)}`); e.preventDefault(); }
+      if (e.key === '1') { deskRoot.rotation.y -= 0.1; console.log(`[前台] 朝向: ${(deskRoot.rotation.y * 180 / Math.PI).toFixed(1)}°`); }
+      if (e.key === '3') { deskRoot.rotation.y += 0.1; console.log(`[前台] 朝向: ${(deskRoot.rotation.y * 180 / Math.PI).toFixed(1)}°`); }
+      if (e.key === '0') {
+        console.log(`%c[前台最终数值] X=${deskRoot.position.x.toFixed(2)} Y=${deskRoot.position.y.toFixed(2)} Z=${deskRoot.position.z.toFixed(2)} 朝向=${(deskRoot.rotation.y * 180 / Math.PI).toFixed(1)}° 缩放=${deskRoot.scaling.x.toFixed(4)}`, 'color:#00ff88;font-size:14px;font-weight:bold');
+      }
+    });
   } catch (err) {
     console.error('[前台] 加载失败:', err);
   }
