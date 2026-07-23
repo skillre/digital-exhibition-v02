@@ -16,48 +16,51 @@ export async function createExhibits(scene, content, hallInfo) {
   const videoExhibits = [];
   const docExhibits = [];
 
-  // ── 海报展品 ──
+  // ── 海报展品（按 itemId 匹配板子，不依赖顺序，支持稀疏放置）──
   const posterZone = content.getZone('poster-zone');
   if (posterZone && posterZone.items) {
     const zone = hallInfo.zones.get('poster-zone');
-    if (zone && zone.boards) {
-      for (let i = 0; i < posterZone.items.length && i < zone.boards.length; i++) {
-        const item = posterZone.items[i];
-        const board = zone.boards[i];
-
-        try {
-          console.log(`[海报] 加载中: ${item.id} → ${item.image}`);
-          const tex = await loadTexture(item.image, scene);
-          const mat = new BABYLON.PBRMaterial(`poster-pbr-${item.id}`, scene);
-          mat.albedoTexture = tex;
-          mat.metallic = 0;
-          mat.roughness = 0.45;
-          mat.emissiveColor = new BABYLON.Color3(0.35, 0.35, 0.40);  // 更亮确保暗环境可见
-          mat.environmentIntensity = 0.5;
-          board.material = mat;
-          createGlowBorder(scene, board, new BABYLON.Color3(0, 0.5, 1.0));
-          console.log(`[海报] 加载成功: ${item.id}`);
-        } catch (e) {
-          console.error(`[海报] 加载失败: ${item.id}`, e.message);
-          // 失败时显示红色边框提示
-          const errMat = new BABYLON.StandardMaterial(`poster-err-${item.id}`, scene);
-          errMat.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.2);
-          errMat.emissiveColor = new BABYLON.Color3(0.5, 0.1, 0.1);
-          board.material = errMat;
-        }
-
-        // 设置拾取元数据
-        board.isPickable = true;
-        board.metadata = { type: 'poster', item };
-
-        posterExhibits.push({
-          id: item.id,
-          type: 'poster',
-          mesh: board,
-          zone: 'poster-zone',
-          data: item,
-        });
+    const boards = (zone && zone.boards) || [];
+    for (const item of posterZone.items) {
+      // 按 contents 里 item.id 找到 hall.js 创建的对应板子
+      const board = boards.find(b => b.metadata && b.metadata.itemId === item.id);
+      if (!board) {
+        console.log(`[海报] 跳过 ${item.id}（尚未在 EXHIBIT_SPOTS 配置位置）`);
+        continue;
       }
+
+      try {
+        console.log(`[海报] 加载中: ${item.id} → ${item.image}`);
+        const tex = await loadTexture(item.image, scene);
+        const mat = new BABYLON.PBRMaterial(`poster-pbr-${item.id}`, scene);
+        mat.albedoTexture = tex;
+        mat.metallic = 0;
+        mat.roughness = 0.45;
+        mat.emissiveColor = new BABYLON.Color3(0.35, 0.35, 0.40);  // 更亮确保暗环境可见
+        mat.environmentIntensity = 0.5;
+        board.material = mat;
+        createGlowBorder(scene, board, new BABYLON.Color3(0, 0.5, 1.0));
+        console.log(`[海报] 加载成功: ${item.id}`);
+      } catch (e) {
+        console.error(`[海报] 加载失败: ${item.id}`, e.message);
+        // 失败时显示红色边框提示
+        const errMat = new BABYLON.StandardMaterial(`poster-err-${item.id}`, scene);
+        errMat.diffuseColor = new BABYLON.Color3(0.8, 0.2, 0.2);
+        errMat.emissiveColor = new BABYLON.Color3(0.5, 0.1, 0.1);
+        board.material = errMat;
+      }
+
+      // 设置拾取元数据
+      board.isPickable = true;
+      board.metadata = { type: 'poster', item, itemId: item.id };
+
+      posterExhibits.push({
+        id: item.id,
+        type: 'poster',
+        mesh: board,
+        zone: 'poster-zone',
+        data: item,
+      });
     }
   }
 

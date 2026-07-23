@@ -8,9 +8,26 @@ import {
 const MODEL_PATH = 'assets/models/';
 const MODEL_FILE = 'VR-Art-Gallery-Lobby-Baked.glb';
 
-// ── 展品位置标记（由用户在浏览器中标记后填入）──
-// 每个展品: { id, type: 'poster'|'video'|'document', x, y, z, yaw, width, height }
-const EXHIBIT_SPOTS = [];
+// ── 展品位置（在浏览器中用 M 键标记后，归一化填入这里）──
+// 每个展品: { type, itemId, x, y, z, yaw(度), width, height }
+//   yaw: 板子面朝方向(度) = M键输出的“朝向”；板法线指向该方向
+//   width/height: 板子尺寸(米)；按图片比例设，避免拉伸变形
+//   itemId: 对应 contents.json 里 items[].id，exhibits.js 据此贴图
+//
+// poster-002 横图(1.78比例)：4点归一化后墙 X=8.47，矩形1.81×1.59，
+// 按宽度1.81保持比例 → 1.81×1.02 居中(上下留~0.29m白边)
+const EXHIBIT_SPOTS = [
+  {
+    type: 'poster',
+    itemId: 'poster-002',
+    x: 8.44, y: 1.475, z: 5.385,
+    yaw: -90,          // 面朝 -X（室内/相机方向）
+    width: 1.81,
+    height: 1.02,      // =1.81/1.78，保持横图比例不变形
+  },
+  // TODO: poster-001 竖图(0.55比例) — 待用M键标记窄高矩形后添加，例如:
+  // { type:'poster', itemId:'poster-001', x:?, y:?, z:?, yaw:?, width:0.9, height:1.6 },
+];
 
 // ── 模型方向调整（弧度）──
 // 如果模型朝向不对，修改这里的旋转值
@@ -178,6 +195,9 @@ export async function createHall(scene) {
   // ── 创建不可见墙体碰撞代理盒（配合椭球碰撞，挡住边界）──
   createWallColliders(scene, bounds, hallMeshes);
 
+  // ── 按 EXHIBIT_SPOTS 创建展品板并注册到 zones ──
+  createExhibitSpots(scene, hallMeshes, zones);
+
   console.log('[展厅] 展区创建完成');
 
   return { zones, hallMeshes, bounds, floorY };
@@ -235,6 +255,39 @@ function createWallColliders(scene, bounds, hallMeshes) {
     hallMeshes.push(wall);
   }
   console.log(`[碰撞] 墙体代理盒×4 已创建 (墙高${wallH.toFixed(1)}m, 房间${roomW.toFixed(1)}×${roomD.toFixed(1)})`);
+}
+
+/**
+ * 按 EXHIBIT_SPOTS 创建展品板（海报/视频屏/文档屏），注册到对应 zone
+ * 板子通过 metadata.itemId 与 contents.json 里的 item.id 关联（不依赖顺序，支持稀疏放置）
+ */
+function createExhibitSpots(scene, hallMeshes, zones) {
+  const posterBoards = [];
+  const videoScreens = [];
+  const docScreens = [];
+
+  for (const spot of EXHIBIT_SPOTS) {
+    const board = BABYLON.MeshBuilder.CreatePlane(
+      `${spot.type}-board-${spot.itemId}`,
+      { width: spot.width, height: spot.height, sideOrientation: BABYLON.Mesh.DOUBLESIDE },
+      scene
+    );
+    board.position = new BABYLON.Vector3(spot.x, spot.y, spot.z);
+    board.rotation.y = spot.yaw * Math.PI / 180;
+    board.isPickable = false;          // exhibits.js 贴图后会设 true
+    board.metadata = { itemId: spot.itemId };
+    hallMeshes.push(board);
+
+    if (spot.type === 'poster') posterBoards.push(board);
+    else if (spot.type === 'video') videoScreens.push(board);
+    else if (spot.type === 'document') docScreens.push(board);
+
+    console.log(`[展品] ${spot.type}板 ${spot.itemId} @ (${spot.x},${spot.y},${spot.z}) ${spot.width}×${spot.height} 朝向${spot.yaw}°`);
+  }
+
+  if (posterBoards.length) zones.set('poster-zone', { id: 'poster-zone', boards: posterBoards });
+  if (videoScreens.length) zones.set('video-zone', { id: 'video-zone', screens: videoScreens });
+  if (docScreens.length) zones.set('doc-zone', { id: 'doc-zone', holoScreens: docScreens });
 }
 
 /**
