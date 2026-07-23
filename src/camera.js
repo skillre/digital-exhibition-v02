@@ -56,32 +56,46 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.keysUpward = [];
   camera.keysDownward = [];
 
-  // ── 锁定高度 + 射线检测墙体碰撞 ──
+  // ── 锁定高度 + 射线检测墙体/前台碰撞 ──
   const lockedY = floorY + eyeHeight;
   const CHECK_DIST = 0.6;  // 前方检测距离
-  const ray = new BABYLON.Ray();
   const lastValidPos = startPos.clone();
+
+  // 碰撞过滤器：检测所有可碰撞的静态物体（墙 + 前台）
+  const collisionFilter = (mesh) => {
+    return mesh.checkCollisions && mesh.isPickable === false;
+  };
 
   scene.onBeforeRenderObservable.add(() => {
     // 锁定高度
     camera.position.y = lockedY;
 
-    // 射线检测：从相机向移动方向发射，如果碰到墙则回退到上次安全位置
-    const forward = camera.getForwardRay().direction;
-    ray.origin = camera.position.clone();
-    ray.direction = forward;
-    ray.length = CHECK_DIST;
+    // 多方向射线检测（前/后/左/右），防止穿过任何物体
+    const dir = new BABYLON.Vector3();
+    camera.getDirectionToRef(BABYLON.Vector3.Forward(), dir);
+    dir.y = 0; dir.normalize();
 
-    const hit = scene.pickWithRay(ray, (mesh) => {
-      return mesh.checkCollisions && mesh.isPickable === false && !mesh.name.includes('poster-board') && !mesh.name.includes('video-screen') && !mesh.name.includes('holo-');
-    });
+    const rightDir = new BABYLON.Vector3();
+    camera.getDirectionToRef(BABYLON.Vector3.Right(), rightDir);
+    rightDir.y = 0; rightDir.normalize();
 
-    if (hit.hit) {
-      // 碰到墙，回退到上次安全位置
+    let collided = false;
+    const origin = camera.position.clone();
+
+    // 检测4个方向
+    for (const d of [dir, dir.scale(-1), rightDir, rightDir.scale(-1)]) {
+      const ray = new BABYLON.Ray(origin, d, CHECK_DIST);
+      const hit = scene.pickWithRay(ray, collisionFilter);
+      if (hit.hit) {
+        collided = true;
+        break;
+      }
+    }
+
+    if (collided) {
       camera.position.x = lastValidPos.x;
       camera.position.z = lastValidPos.z;
     } else {
-      // 没碰墙，更新安全位置
       lastValidPos.x = camera.position.x;
       lastValidPos.z = camera.position.z;
     }

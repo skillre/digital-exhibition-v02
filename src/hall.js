@@ -338,16 +338,70 @@ async function loadReceptionDesk(scene, hallMeshes) {
       deskMeshes.forEach(m => m.computeWorldMatrix(true));
     }
 
-    // ── 覆盖前台材质颜色 ──
-    // GLB 烘焙材质可能显示为灰色，用 PBR 材质替换
-    const DESK_COLOR = new BABYLON.Color3(0.15, 0.12, 0.10);  // 深棕色，可调整
+    // ── 覆盖前台材质颜色 + 添加纹理 ──
+    // #dcdad7 = RGB(0.863, 0.855, 0.843)
+    const DESK_COLOR = new BABYLON.Color3(0.863, 0.855, 0.843);
     const deskMat = new BABYLON.PBRMaterial('desk-mat', scene);
     deskMat.albedoColor = DESK_COLOR;
-    deskMat.metallic = 0.3;
-    deskMat.roughness = 0.6;
+    deskMat.metallic = 0.2;
+    deskMat.roughness = 0.7;
     deskMat.environmentIntensity = 0.5;
+
+    // 添加程序化纹理（细微凹凸 + 划痕）
+    const deskTex = new BABYLON.DynamicTexture('desk-tex', 512, scene, false);
+    const texCtx = deskTex.getContext();
+    // 基础色
+    texCtx.fillStyle = '#dcdad7';
+    texCtx.fillRect(0, 0, 512, 512);
+    // 细密颗粒纹理
+    for (let i = 0; i < 8000; i++) {
+      const x = Math.random() * 512, y = Math.random() * 512;
+      const v = Math.random() * 20 - 10;
+      texCtx.fillStyle = `rgba(${220+v}, ${218+v}, ${215+v}, ${Math.random()*0.15})`;
+      texCtx.fillRect(x, y, 1, 1);
+    }
+    // 水平划痕
+    for (let i = 0; i < 200; i++) {
+      const y = Math.random() * 512;
+      const x = Math.random() * 256;
+      const len = 20 + Math.random() * 80;
+      texCtx.strokeStyle = `rgba(180, 178, 175, ${Math.random()*0.1})`;
+      texCtx.lineWidth = 0.5;
+      texCtx.beginPath(); texCtx.moveTo(x, y); texCtx.lineTo(x + len, y + (Math.random()-0.5)*2); texCtx.stroke();
+    }
+    // 大理石纹路
+    for (let i = 0; i < 15; i++) {
+      texCtx.strokeStyle = `rgba(200, 198, 195, ${Math.random()*0.2})`;
+      texCtx.lineWidth = 1 + Math.random() * 2;
+      texCtx.beginPath();
+      const sx = Math.random() * 512, sy = Math.random() * 512;
+      texCtx.moveTo(sx, sy);
+      for (let j = 0; j < 5; j++) {
+        texCtx.lineTo(sx + (Math.random()-0.5)*200, sy + (Math.random()-0.5)*200);
+      }
+      texCtx.stroke();
+    }
+    deskTex.update();
+    deskMat.albedoTexture = deskTex;
+
+    // 添加法线贴图用于凹凸感
+    const normalTex = new BABYLON.DynamicTexture('desk-normal', 512, scene, false);
+    const normCtx = normalTex.getContext();
+    const normData = normCtx.createImageData(512, 512);
+    for (let i = 0; i < normData.data.length; i += 4) {
+      const v = 128 + (Math.random()-0.5) * 20;
+      normData.data[i] = v;     // R
+      normData.data[i+1] = v;   // G
+      normData.data[i+2] = 255; // B
+      normData.data[i+3] = 255; // A
+    }
+    normCtx.putImageData(normData, 0, 0);
+    normalTex.update();
+    deskMat.bumpTexture = normalTex;
+    deskMat.bumpTexture.level = 0.3;
+
     deskMeshes.forEach(m => { m.material = deskMat; });
-    console.log(`[前台] 材质颜色已覆盖: RGB(${DESK_COLOR.r}, ${DESK_COLOR.g}, ${DESK_COLOR.b})`);
+    console.log(`[前台] 材质颜色: #dcdad7 + 纹理(颗粒/划痕/大理石纹)`, 'color:#dcdad7');
 
     // 调试：在前台位置添加标记球
     const marker = BABYLON.MeshBuilder.CreateSphere('desk-marker', { diameter: 0.3 }, scene);
