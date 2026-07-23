@@ -541,18 +541,49 @@ async function loadReceptionDesk(scene, hallMeshes) {
     deskRoot.position = new BABYLON.Vector3(DESK_X, DESK_Y, DESK_Z);
     deskRoot.rotation.y = DESK_YAW * Math.PI / 180;
 
+    const deskMeshes = [];
     for (const mesh of result.meshes) {
       if (mesh.name === '__root__') continue;
       mesh.parent = deskRoot;
       mesh.checkCollisions = true;
       mesh.isPickable = false;
       mesh.receiveShadows = true;
+      deskMeshes.push(mesh);
       hallMeshes.push(mesh);
     }
 
     // 强制更新世界矩阵
     deskRoot.computeWorldMatrix(true);
-    result.meshes.forEach(m => m.computeWorldMatrix(true));
+    deskMeshes.forEach(m => m.computeWorldMatrix(true));
+
+    // 检测前台模型尺寸并自动缩放
+    const deskBounds = computeSceneBounds(deskMeshes);
+    const deskW = deskBounds.maxX - deskBounds.minX;
+    const deskH = deskBounds.maxY - deskBounds.minY;
+    const deskD = deskBounds.maxZ - deskBounds.minZ;
+    const deskMaxDim = Math.max(deskW, deskH, deskD);
+    console.log(`[前台] 原始尺寸: W=${deskW.toFixed(3)} H=${deskH.toFixed(3)} D=${deskD.toFixed(3)}`);
+
+    // 前台目标尺寸约 2m 宽
+    const TARGET_DESK_SIZE = 2.0;
+    if (deskMaxDim > 0) {
+      const deskScale = TARGET_DESK_SIZE / deskMaxDim;
+      if (deskScale < 0.1 || deskScale > 10) {
+        console.log(`[前台] 自动缩放: ${deskScale.toFixed(3)}x`);
+        deskRoot.scaling = new BABYLON.Vector3(deskScale, deskScale, deskScale);
+        deskRoot.computeWorldMatrix(true);
+        deskMeshes.forEach(m => m.computeWorldMatrix(true));
+      }
+    }
+
+    // 调试：在前台位置添加标记球
+    const marker = BABYLON.MeshBuilder.CreateSphere('desk-marker', { diameter: 0.3 }, scene);
+    marker.position = new BABYLON.Vector3(DESK_X, DESK_Y + 1, DESK_Z);
+    const markerMat = new BABYLON.StandardMaterial('desk-marker-mat', scene);
+    markerMat.emissiveColor = new BABYLON.Color3(1, 0, 0);
+    markerMat.disableLighting = true;
+    marker.material = markerMat;
+    marker.isPickable = false;
 
     console.log(`[前台] 位置: (${DESK_X}, ${DESK_Y}, ${DESK_Z}), 朝向: ${DESK_YAW}°`);
   } catch (err) {
