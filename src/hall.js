@@ -117,7 +117,7 @@ export async function createHall(scene) {
   // 故对这些 mesh 直接开启 checkCollisions，配合椭球阻挡穿越。
   // 故意排除: floor(贴地无效)/pic*(画)/rocks·tree·leaves(室外)·spot·lighting·carpet·seat·vase。
   // 若某前缀的 mesh 法线异常导致椭球卡顿，从此处移除即可(可逆)。
-  const COLLISION_MESH_PREFIXES = ['wall', 'frame', 'house_dec'];
+  const COLLISION_MESH_PREFIXES = ['house', 'wall', 'frame'];
 
   for (const mesh of result.meshes) {
     // 跳过 __root__ TransformNode
