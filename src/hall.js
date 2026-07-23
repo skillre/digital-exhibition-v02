@@ -414,19 +414,18 @@ async function loadReceptionDesk(scene, hallMeshes) {
       (deskBoundsAfterScale.maxZ + deskBoundsAfterScale.minZ) / 2
     );
 
+    // 不挂载到 deskRoot，避免被缩放影响
     const deskCollider = BABYLON.MeshBuilder.CreateBox('desk-collider', {
-      width: deskBoxW + 0.2,   // 比实际稍大
-      height: deskBoxH + 0.2,
-      depth: deskBoxD + 0.2,
+      width: deskBoxW + 0.3,
+      height: deskBoxH + 0.3,
+      depth: deskBoxD + 0.3,
     }, scene);
     deskCollider.position = deskBoxCenter;
-    deskCollider.rotation.y = DESK_YAW * Math.PI / 180;
     deskCollider.checkCollisions = true;
     deskCollider.isPickable = false;
     deskCollider.isVisible = false;  // 不可见，仅用于碰撞
-    deskCollider.parent = deskRoot;
     hallMeshes.push(deskCollider);
-    console.log(`[前台] 碰撞盒: ${deskBoxW.toFixed(2)}x${deskBoxH.toFixed(2)}x${deskBoxD.toFixed(2)}`);
+    console.log(`[前台] 碰撞盒: ${deskBoxW.toFixed(2)}x${deskBoxH.toFixed(2)}x${deskBoxD.toFixed(2)} 位置: (${deskBoxCenter.x.toFixed(2)}, ${deskBoxCenter.y.toFixed(2)}, ${deskBoxCenter.z.toFixed(2)})`);
 
     // 调试：在前台位置添加标记球
     const marker = BABYLON.MeshBuilder.CreateSphere('desk-marker', { diameter: 0.3 }, scene);
