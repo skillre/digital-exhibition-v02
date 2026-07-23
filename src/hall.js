@@ -403,6 +403,31 @@ async function loadReceptionDesk(scene, hallMeshes) {
     deskMeshes.forEach(m => { m.material = deskMat; });
     console.log(`[前台] 材质颜色: #dcdad7 + 纹理(颗粒/划痕/大理石纹)`, 'color:#dcdad7');
 
+    // ── 添加不可见碰撞包围盒（解决薄物体穿模问题）──
+    const deskBoundsAfterScale = computeSceneBounds(deskMeshes);
+    const deskBoxW = deskBoundsAfterScale.maxX - deskBoundsAfterScale.minX;
+    const deskBoxH = deskBoundsAfterScale.maxY - deskBoundsAfterScale.minY;
+    const deskBoxD = deskBoundsAfterScale.maxZ - deskBoundsAfterScale.minZ;
+    const deskBoxCenter = new BABYLON.Vector3(
+      (deskBoundsAfterScale.maxX + deskBoundsAfterScale.minX) / 2,
+      (deskBoundsAfterScale.maxY + deskBoundsAfterScale.minY) / 2,
+      (deskBoundsAfterScale.maxZ + deskBoundsAfterScale.minZ) / 2
+    );
+
+    const deskCollider = BABYLON.MeshBuilder.CreateBox('desk-collider', {
+      width: deskBoxW + 0.2,   // 比实际稍大
+      height: deskBoxH + 0.2,
+      depth: deskBoxD + 0.2,
+    }, scene);
+    deskCollider.position = deskBoxCenter;
+    deskCollider.rotation.y = DESK_YAW * Math.PI / 180;
+    deskCollider.checkCollisions = true;
+    deskCollider.isPickable = false;
+    deskCollider.isVisible = false;  // 不可见，仅用于碰撞
+    deskCollider.parent = deskRoot;
+    hallMeshes.push(deskCollider);
+    console.log(`[前台] 碰撞盒: ${deskBoxW.toFixed(2)}x${deskBoxH.toFixed(2)}x${deskBoxD.toFixed(2)}`);
+
     // 调试：在前台位置添加标记球
     const marker = BABYLON.MeshBuilder.CreateSphere('desk-marker', { diameter: 0.3 }, scene);
     marker.position = new BABYLON.Vector3(DESK_X, DESK_Y + 1, DESK_Z);
