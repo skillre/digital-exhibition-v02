@@ -38,8 +38,18 @@ export function setupCamera(scene, canvas, hallInfo) {
   // 初始朝向：用户定位的 -92°
   camera.rotation.y = startYaw * Math.PI / 180;
 
-  // ── 碰撞检测：关闭相机碰撞（法线方向错误会阻止移动）──
-  // 改用渲染循环锁定 Y + 射线检测墙体
+  // ── 碰撞检测：原生椭球碰撞（全身高度，挡住矮前台）──
+  // 关键：椭球从地板覆盖到1.7m全身高度，矮前台(~1.1m)必然被挡住。
+  // 旧的『眼高1.6m水平射线』会从前台顶部飞过→必然穿模，已弃用。
+  // GLB 法线错误会导致椭球卡顿，故 GLB mesh 关闭碰撞，
+  // 改用不可见代理盒(法线正确的BOX)做碰撞，见 hall.js。
+  camera.checkCollisions = true;
+  camera.applyGravity = false;
+  // 椭球: 半宽0.35m, 半高0.85m → 实体直径0.7m × 高1.7m
+  camera.ellipsoid = new BABYLON.Vector3(0.35, 0.85, 0.35);
+  // 椭球中心位于相机下方0.75m: 相机1.6 - 0.75 = 0.85 = 半高
+  // → 椭球底贴地板(0), 顶到1.7m，覆盖整个身体
+  camera.ellipsoidOffset = new BABYLON.Vector3(0, -0.75, 0);
 
   // ── 移动参数 ──
   camera.speed = 0.45;
@@ -56,49 +66,10 @@ export function setupCamera(scene, canvas, hallInfo) {
   camera.keysUpward = [];
   camera.keysDownward = [];
 
-  // ── 锁定高度 + 射线检测墙体/前台碰撞 ──
+  // ── 锁定高度（椭球碰撞只处理X/Z滑动，Y由这里强制锁定）──
   const lockedY = floorY + eyeHeight;
-  const CHECK_DIST = 0.6;  // 前方检测距离
-  const lastValidPos = startPos.clone();
-
-  // 碰撞过滤器：检测所有可碰撞的静态物体（墙 + 前台）
-  const collisionFilter = (mesh) => {
-    return mesh.checkCollisions && mesh.isPickable === false;
-  };
-
   scene.onBeforeRenderObservable.add(() => {
-    // 锁定高度
     camera.position.y = lockedY;
-
-    // 多方向射线检测（前/后/左/右），防止穿过任何物体
-    const dir = new BABYLON.Vector3();
-    camera.getDirectionToRef(BABYLON.Vector3.Forward(), dir);
-    dir.y = 0; dir.normalize();
-
-    const rightDir = new BABYLON.Vector3();
-    camera.getDirectionToRef(BABYLON.Vector3.Right(), rightDir);
-    rightDir.y = 0; rightDir.normalize();
-
-    let collided = false;
-    const origin = camera.position.clone();
-
-    // 检测4个方向
-    for (const d of [dir, dir.scale(-1), rightDir, rightDir.scale(-1)]) {
-      const ray = new BABYLON.Ray(origin, d, CHECK_DIST);
-      const hit = scene.pickWithRay(ray, collisionFilter);
-      if (hit.hit) {
-        collided = true;
-        break;
-      }
-    }
-
-    if (collided) {
-      camera.position.x = lastValidPos.x;
-      camera.position.z = lastValidPos.z;
-    } else {
-      lastValidPos.x = camera.position.x;
-      lastValidPos.z = camera.position.z;
-    }
   });
 
   camera.attachControl(canvas, false);

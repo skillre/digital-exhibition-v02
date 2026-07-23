@@ -70,8 +70,8 @@ export async function createHall(scene) {
     // 跳过 __root__ TransformNode
     if (mesh.name === '__root__') continue;
 
-    // 设置碰撞
-    mesh.checkCollisions = true;
+    // GLB 法线错误会导致椭球碰撞卡顿 → 关闭GLB碰撞，改用不可见代理盒
+    mesh.checkCollisions = false;
     mesh.isPickable = false;
     mesh.receiveShadows = true;
 
@@ -175,6 +175,9 @@ export async function createHall(scene) {
   // ═══════════════════════════════════════
   await loadReceptionDesk(scene, hallMeshes);
 
+  // ── 创建不可见墙体碰撞代理盒（配合椭球碰撞，挡住边界）──
+  createWallColliders(scene, bounds, hallMeshes);
+
   console.log('[展厅] 展区创建完成');
 
   return { zones, hallMeshes, bounds, floorY };
@@ -200,6 +203,38 @@ function computeSceneBounds(meshes) {
   }
 
   return { minX, minY, minZ, maxX, maxY, maxZ };
+}
+
+/**
+ * 创建不可见墙体碰撞代理盒（4面墙，法线正确的BOX，配合椭球碰撞）
+ * GLB墙体法线错误会让椭球卡顿，故用规则BOX代理。
+ */
+function createWallColliders(scene, bounds, hallMeshes) {
+  const wallH = Math.max(2.0, bounds.maxY);        // 墙高: 至少2m 或到天花板
+  const thin = 0.5;                                 // 墙厚
+  const roomW = bounds.maxX - bounds.minX;
+  const roomD = bounds.maxZ - bounds.minZ;
+  const cx = (bounds.maxX + bounds.minX) / 2;
+  const cz = (bounds.maxZ + bounds.minZ) / 2;
+
+  const defs = [
+    { name: 'collider-wall-south', w: roomW + thin, d: thin,        x: cx,          z: bounds.minZ },
+    { name: 'collider-wall-north', w: roomW + thin, d: thin,        x: cx,          z: bounds.maxZ },
+    { name: 'collider-wall-east',  w: thin,         d: roomD + thin, x: bounds.maxX, z: cz },
+    { name: 'collider-wall-west',  w: thin,         d: roomD + thin, x: bounds.minX, z: cz },
+  ];
+
+  for (const d of defs) {
+    const wall = BABYLON.MeshBuilder.CreateBox(d.name, {
+      width: d.w, height: wallH, depth: d.d,
+    }, scene);
+    wall.position = new BABYLON.Vector3(d.x, wallH / 2, d.z);
+    wall.checkCollisions = true;
+    wall.isPickable = false;
+    wall.isVisible = false;       // 不可见，仅碰撞
+    hallMeshes.push(wall);
+  }
+  console.log(`[碰撞] 墙体代理盒×4 已创建 (墙高${wallH.toFixed(1)}m, 房间${roomW.toFixed(1)}×${roomD.toFixed(1)})`);
 }
 
 /**
@@ -307,7 +342,7 @@ async function loadReceptionDesk(scene, hallMeshes) {
     for (const mesh of result.meshes) {
       if (mesh.name === '__root__') continue;
       mesh.parent = deskRoot;
-      mesh.checkCollisions = true;
+      mesh.checkCollisions = false;   // GLB关闭碰撞，用全身代理盒
       mesh.isPickable = false;
       mesh.receiveShadows = true;
       deskMeshes.push(mesh);
@@ -402,6 +437,27 @@ async function loadReceptionDesk(scene, hallMeshes) {
 
     deskMeshes.forEach(m => { m.material = deskMat; });
     console.log(`[前台] 材质颜色: #dcdad7 + 纹理(颗粒/划痕/大理石纹)`, 'color:#dcdad7');
+
+    // ── 前台全身高碰撞代理盒（地板→1.8m，挡住椭球顶部1.7m）──
+    // 不挂到 deskRoot（会被0.0061缩放），用世界坐标直接定位
+    // 关键: 高度1.8m > 椭球顶1.7m，确保椭球无法从前台顶部翻过
+    const db = computeSceneBounds(deskMeshes);  // 缩放后的世界bounds
+    const PAD = 0.15;
+    const deskCollider = BABYLON.MeshBuilder.CreateBox('desk-collider', {
+      width: (db.maxX - db.minX) + PAD * 2,
+      height: 1.8,                      // 地板到1.8m
+      depth: (db.maxZ - db.minZ) + PAD * 2,
+    }, scene);
+    deskCollider.position = new BABYLON.Vector3(
+      (db.maxX + db.minX) / 2,
+      0.9,                              // 1.8 / 2
+      (db.maxZ + db.minZ) / 2
+    );
+    deskCollider.checkCollisions = true;
+    deskCollider.isPickable = false;
+    deskCollider.isVisible = false;     // 不可见，仅碰撞
+    hallMeshes.push(deskCollider);
+    console.log(`[前台] 全身碰撞盒 ${(db.maxX-db.minX).toFixed(2)}x${(db.maxZ-db.minZ).toFixed(2)} 高1.8m @ (${deskCollider.position.x.toFixed(2)}, ${deskCollider.position.z.toFixed(2)})`);
 
     // 调试：在前台位置添加标记球
     const marker = BABYLON.MeshBuilder.CreateSphere('desk-marker', { diameter: 0.3 }, scene);
