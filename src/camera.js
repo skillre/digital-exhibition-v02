@@ -141,7 +141,20 @@ export function setupCamera(scene, canvas, hallInfo) {
         BABYLON.Matrix.Identity(),
         camera
       );
-      const hit = scene.pickWithRay(ray);
+      // 自定义谓词：覆盖默认的 isPickable 过滤。
+      // 房间/前台 GLB mesh 的 isPickable=false（为配合碰撞系统设的），
+      // 若用默认 pickWithRay 会拾取不到任何东西→误报“没有检测到墙面”。
+      // 这里用属性白名单：排除不可见碰撞盒、调试物体、标记球，其余皆可拾取。
+      const pickFilter = (mesh) => {
+        if (!mesh) return false;
+        if (mesh.isVisible === false) return false;            // 不可见碰撞盒
+        if (mesh.name.startsWith('exhibit-marker-')) return false;  // 已放置标记球
+        if (mesh.name.startsWith('debug-')) return false;          // 调试轴/边界
+        if (mesh.name === 'desk-marker') return false;             // 前台调试标记
+        if (mesh.material && mesh.material.disableLighting) return false;  // 调试发光物
+        return true;  // 其余（GLB 墙/柱/地板/前台等）皆可拾取
+      };
+      const hit = scene.pickWithRay(ray, pickFilter);
       if (hit.hit && hit.pickedPoint) {
         const p = hit.pickedPoint;
         const idx = markers.length + 1;
