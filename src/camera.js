@@ -145,6 +145,50 @@ export function setupCamera(scene, canvas, hallInfo) {
     }
   });
 
+  // ── M 键标记展品位置（在视线前方墙面/柱子处放置标记球）──
+  const markers = [];
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'm' || e.key === 'M') {
+      // 从相机发射射线，检测前方物体
+      const ray = scene.createPickingRay(
+        scene.getEngine().getRenderWidth() / 2,
+        scene.getEngine().getRenderHeight() / 2,
+        BABYLON.Matrix.Identity(),
+        camera
+      );
+      const hit = scene.pickWithRay(ray);
+      if (hit.hit && hit.pickedPoint) {
+        const p = hit.pickedPoint;
+        const idx = markers.length + 1;
+        // 放置标记球
+        const marker = BABYLON.MeshBuilder.CreateSphere(`exhibit-marker-${idx}`, { diameter: 0.2 }, scene);
+        marker.position = p.clone();
+        const m = new BABYLON.StandardMaterial(`marker-mat-${idx}`, scene);
+        m.emissiveColor = new BABYLON.Color3(0, 1, 0);  // 绿色
+        m.disableLighting = true;
+        marker.material = m;
+        marker.isPickable = false;
+        markers.push(marker);
+
+        // 计算朝向（从标记点看向相机）
+        const dx = camera.position.x - p.x;
+        const dz = camera.position.z - p.z;
+        const yaw = Math.atan2(dx, dz) * 180 / Math.PI;
+
+        console.log(`%c[标记 #${idx}] X=${p.x.toFixed(2)} Y=${p.y.toFixed(2)} Z=${p.z.toFixed(2)} 朝向=${yaw.toFixed(1)}° (前方墙面/柱子)`, 'color:#00ff00;font-size:14px;font-weight:bold');
+      } else {
+        console.log('%c[标记] 前方没有检测到墙面，请对准墙面或柱子后按 M', 'color:#ff8800;font-weight:bold');
+      }
+    }
+
+    // C 键清除所有标记
+    if (e.key === 'c' || e.key === 'C') {
+      markers.forEach(m => m.dispose());
+      markers.length = 0;
+      console.log('%c[标记] 已清除所有标记', 'color:#ff8800;font-weight:bold');
+    }
+  });
+
   return {
     camera,
     teleportTo,
