@@ -16,6 +16,12 @@ const MODEL_FILE = 'VR-Art-Gallery-Lobby-Baked.glb';
 //
 // poster-002 横图(1.78比例)：4点归一化后墙 X=8.47，矩形1.81×1.59，
 // 按宽度1.81保持比例 → 1.81×1.02 居中(上下留~0.29m白边)
+//
+// poster-001 竖图(0.55比例, 2880×5210)：东墙 X≈8.47 北侧开口 ~1.92×1.59
+//   按高度1.59保持比例 → 0.88×1.59，左右留约0.52m白边
+//
+// video-001/video-002：北/南斜墙开口 ~3.00×1.11，视频均为 16:9(1.78)
+//   按高度1.10保持比例 → 1.96×1.10，左右留约0.52m边框
 const EXHIBIT_SPOTS = [
   {
     type: 'poster',
@@ -25,8 +31,30 @@ const EXHIBIT_SPOTS = [
     width: 1.81,
     height: 1.02,      // =1.81/1.78，保持横图比例不变形
   },
-  // TODO: poster-001 竖图(0.55比例) — 待用M键标记窄高矩形后添加，例如:
-  // { type:'poster', itemId:'poster-001', x:?, y:?, z:?, yaw:?, width:0.9, height:1.6 },
+  {
+    type: 'poster',
+    itemId: 'poster-001',
+    x: 8.47, y: 1.56, z: -5.08,
+    yaw: -90,          // 面朝 -X（室内/相机方向）
+    width: 0.88,       // =1.59*0.553，按高度适配竖图比例不变形
+    height: 1.59,
+  },
+  {
+    type: 'video',
+    itemId: 'video-001',
+    x: -0.06, y: 1.56, z: 8.18,
+    yaw: 128,          // 北斜墙，面朝西南偏南（室内）
+    width: 1.96,       // =1.10*1.78，按高度适配16:9不变形
+    height: 1.10,
+  },
+  {
+    type: 'video',
+    itemId: 'video-002',
+    x: -0.06, y: 1.48, z: -8.19,
+    yaw: 47,           // 南斜墙，面朝东北偏北（室内）
+    width: 1.96,
+    height: 1.10,
+  },
 ];
 
 // ── 模型方向调整（弧度）──
@@ -285,9 +313,61 @@ function createExhibitSpots(scene, hallMeshes, zones) {
     console.log(`[展品] ${spot.type}板 ${spot.itemId} @ (${spot.x},${spot.y},${spot.z}) ${spot.width}×${spot.height} 朝向${spot.yaw}°`);
   }
 
-  if (posterBoards.length) zones.set('poster-zone', { id: 'poster-zone', boards: posterBoards });
-  if (videoScreens.length) zones.set('video-zone', { id: 'video-zone', screens: videoScreens });
-  if (docScreens.length) zones.set('doc-zone', { id: 'doc-zone', holoScreens: docScreens });
+  // ── 注册 zone 并补 entry/label/center 让导航菜单可用 ──
+  // 视点位置 = 板子前方 1.6m（沿板法线方向，板法线已指向室内/相机侧）
+  // 即 viewer = boardPos + (sin(yaw), 0, cos(yaw)) * VIEW_DIST
+  const EYE_Y = 1.7;
+  const VIEW_DIST = 1.6;
+
+  if (posterBoards.length) {
+    // 海报全部在东墙 X≈8.47，取最靠南的板前方作为该 zone 视点
+    const main = posterBoards.reduce((a, b) => (b.position.z > a.position.z ? b : a));
+    const yawRad = main.rotation.y;
+    const entry = new BABYLON.Vector3(
+      main.position.x + Math.sin(yawRad) * VIEW_DIST,
+      EYE_Y,
+      main.position.z + Math.cos(yawRad) * VIEW_DIST
+    );
+    zones.set('poster-zone', {
+      id: 'poster-zone', label: '安全知识展板',
+      boards: posterBoards,
+      center: new BABYLON.Vector3(main.position.x, 0, main.position.z),
+      entry,
+    });
+    console.log(`[展区] poster-zone 视点: (${entry.x.toFixed(2)}, ${entry.z.toFixed(2)})`);
+  }
+  if (videoScreens.length) {
+    const main = videoScreens[0];
+    const yawRad = main.rotation.y;
+    const entry = new BABYLON.Vector3(
+      main.position.x + Math.sin(yawRad) * VIEW_DIST,
+      EYE_Y,
+      main.position.z + Math.cos(yawRad) * VIEW_DIST
+    );
+    zones.set('video-zone', {
+      id: 'video-zone', label: '评估成果视频',
+      screens: videoScreens,
+      center: new BABYLON.Vector3(main.position.x, 0, main.position.z),
+      entry,
+    });
+    console.log(`[展区] video-zone 视点: (${entry.x.toFixed(2)}, ${entry.z.toFixed(2)})`);
+  }
+  if (docScreens.length) {
+    const main = docScreens[0];
+    const yawRad = main.rotation.y;
+    const entry = new BABYLON.Vector3(
+      main.position.x + Math.sin(yawRad) * VIEW_DIST,
+      EYE_Y,
+      main.position.z + Math.cos(yawRad) * VIEW_DIST
+    );
+    zones.set('doc-zone', {
+      id: 'doc-zone', label: '文档资料库',
+      holoScreens: docScreens,
+      center: new BABYLON.Vector3(main.position.x, 0, main.position.z),
+      entry,
+    });
+    console.log(`[展区] doc-zone 视点: (${entry.x.toFixed(2)}, ${entry.z.toFixed(2)})`);
+  }
 }
 
 /**

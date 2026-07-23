@@ -48,6 +48,13 @@
           "description": "数据安全评估服务全流程介绍",
           "src": "assets/videos/video-001.mp4",
           "poster": "assets/posters/poster-001.png"
+        },
+        {
+          "id": "video-002",
+          "title": "评估成果演示",
+          "description": "数据安全评估关键成果演示视频",
+          "src": "assets/videos/video-002.mp4",
+          "poster": "assets/posters/poster-003.jpg"
         }
       ]
     },

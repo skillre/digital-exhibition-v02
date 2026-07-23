@@ -64,27 +64,57 @@ export async function createExhibits(scene, content, hallInfo) {
     }
   }
 
-  // ── 视频展品（VideoTexture 在 Phase 5 实现）──
+  // ── 视频展品（3D屏贴封面图，点击由 ui.js 弹 HTML <video> 播放器）──
   const videoZone = content.getZone('video-zone');
   if (videoZone && videoZone.items) {
     const zone = hallInfo.zones.get('video-zone');
-    if (zone && zone.screens) {
-      for (let i = 0; i < videoZone.items.length && i < zone.screens.length; i++) {
-        const item = videoZone.items[i];
-        const screen = zone.screens[i];
-
-        // 设置拾取元数据（视频播放由 video-player.js 处理）
-        screen.isPickable = true;
-        screen.metadata = { type: 'video', item, toggle: null };
-
-        videoExhibits.push({
-          id: item.id,
-          type: 'video',
-          mesh: screen,
-          zone: 'video-zone',
-          data: item,
-        });
+    const screens = (zone && zone.screens) || [];
+    for (const item of videoZone.items) {
+      // 按 itemId 关联 hall.js 创建的屏幕（与海报一致，不依赖顺序）
+      const screen = screens.find(s => s.metadata && s.metadata.itemId === item.id);
+      if (!screen) {
+        console.log(`[视频] 跳过 ${item.id}（尚未在 EXHIBIT_SPOTS 配置位置）`);
+        continue;
       }
+
+      // 在3D屏表面贴上封面图（静态）
+      try {
+        if (item.poster) {
+          console.log(`[视频] 加载封面: ${item.id} → ${item.poster}`);
+          const tex = await loadTexture(item.poster, scene);
+          const mat = new BABYLON.StandardMaterial(`video-cover-${item.id}`, scene);
+          mat.diffuseTexture = tex;
+          mat.emissiveColor = new BABYLON.Color3(0.30, 0.30, 0.35);
+          mat.diffuseColor = new BABYLON.Color3(0.5, 0.5, 0.5);
+          screen.material = mat;
+        } else {
+          // 无封面 → 深色 idle 材质
+          const mat = new BABYLON.StandardMaterial(`video-cover-${item.id}`, scene);
+          mat.diffuseColor = new BABYLON.Color3(0.12, 0.15, 0.25);
+          mat.emissiveColor = new BABYLON.Color3(0.08, 0.10, 0.20);
+          screen.material = mat;
+        }
+        createGlowBorder(scene, screen, new BABYLON.Color3(0, 0.5, 1.0));
+        console.log(`[视频] 封面加载成功: ${item.id}`);
+      } catch (e) {
+        console.error(`[视频封面] 加载失败: ${item.id}`, e.message);
+        const errMat = new BABYLON.StandardMaterial(`video-err-${item.id}`, scene);
+        errMat.diffuseColor = new BABYLON.Color3(0.12, 0.15, 0.25);
+        errMat.emissiveColor = new BABYLON.Color3(0.5, 0.1, 0.1);
+        screen.material = errMat;
+      }
+
+      // 设置拾取元数据（3D视频播放由 ui.js 弹 HTML <video> 处理）
+      screen.isPickable = true;
+      screen.metadata = { type: 'video', item };
+
+      videoExhibits.push({
+        id: item.id,
+        type: 'video',
+        mesh: screen,
+        zone: 'video-zone',
+        data: item,
+      });
     }
   }
 

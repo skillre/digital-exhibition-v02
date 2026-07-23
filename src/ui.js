@@ -217,12 +217,14 @@ export function setupUI(content, exhibits, cameraCtrl) {
       const btn = e.target.closest('.nav-btn');
       if (!btn || !hallInfo) return;
       const zoneId = btn.dataset.zone;
-      if (hallInfo.zones.has(zoneId)) {
-        const zone = hallInfo.zones.get(zoneId);
-        if (cameraCtrl) {
-          cameraCtrl.teleportTo(zone.entry);
-          showToast(`已传送到：${zone.label || zoneId}`);
-        }
+      const zone = hallInfo.zones.get(zoneId);
+      if (!zone || !zone.entry) {
+        showToast(`【${zone?.label || zoneId}】该展区尚未布置展品`);
+        return;
+      }
+      if (cameraCtrl) {
+        cameraCtrl.teleportTo(zone.entry);
+        showToast(`已传送到：${zone.label || zoneId}`);
       }
     });
   }
