@@ -378,3 +378,70 @@ function getMeshSize(mesh) {
   const s = bb.maximumWorld.subtract(bb.minimumWorld);
   return { width: Math.abs(s.x), height: Math.abs(s.y) };
 }
+
+// ── 实体相框（在面板边缘向外伸出，类似真实相框）──
+// 用 4 根带厚度(depth)的 Box 木条围住面板外缘，向四边外伸 + 向前凸出板表面，
+// 形成立体相框；不遮挡画面。框条作为面板的子节点，跟随面板旋转/移动。
+//
+// 参数:
+//   scene, frameMesh(面板), { frameW(框条宽度/厚度), depth(向前凸出), margin(额外外伸),
+//     color(木材底色), mat(自定义材质; 不传则自动用深色哑光木纹) }
+// 返回: { frame: TransformNode(框组根), bars: [上/下/左/右 4根] }
+export function createPictureFrame(scene, frameMesh, opts = {}) {
+  const { width, height } = getMeshSize(frameMesh);
+  const frameW = opts.frameW ?? 0.10;      // 框条截面宽度(厚度)
+  const depth = opts.depth ?? 0.06;        // 向前凸出板表面的距离
+  const margin = opts.margin ?? 0.04;      // 在面板外缘再向外伸出
+  const color = opts.color || new BABYLON.Color3(0.15, 0.10, 0.07);  // 深棕木色
+
+  // 框组根节点，挂到面板上(随板旋转/移动)，z 轴略向前推
+  const frame = new BABYLON.TransformNode(`${frameMesh.name}-frame`, scene);
+  frame.parent = frameMesh;
+  frame.position = new BABYLON.Vector3(0, 0, depth / 2);
+
+  // 木材材质: 哑光 PBR，细微程序纹理增加质感
+  const woodMat = opts.mat || (() => {
+    const m = new BABYLON.PBRMaterial(`${frameMesh.name}-wood-mat`, scene);
+    m.albedoColor = color;
+    m.metallic = 0.0;
+    m.roughness = 0.85;
+    m.environmentIntensity = 0.5;
+    return m;
+  })();
+
+  // 整体外尺寸 = 面板 + margin + 框宽 (框条中心位于边缘外 frameW/2)
+  const outerW = width + margin * 2 + frameW;
+  const outerH = height + margin * 2 + frameW;
+  // 各条长度(水平条跨满外宽; 竖条夹在两根水平条之间)
+  const hBarLen = outerW;
+  const vBarLen = outerH - frameW * 2;
+
+  // 框条截面: frameW × depth (宽 × 前凸)，轴对齐: box 的 width(X)=frameW, height(Y)=depth
+  const bars = [];
+  const mkBar = (name, sx, sy, len, w /*沿len方向的尺寸X*/, axis /*'h'|'v'*/) => {
+    // Babylon Box 尺寸: width(X) height(Y) depth(Z)
+    let box;
+    if (axis === 'h') {
+      box = BABYLON.MeshBuilder.CreateBox(name, { width: len, height: depth, depth: frameW }, scene);
+      box.position = new BABYLON.Vector3(0, sy, 0);
+    } else {
+      box = BABYLON.MeshBuilder.CreateBox(name, { width: frameW, height: len, depth: depth }, scene);
+      box.position = new BABYLON.Vector3(sx, 0, 0);
+    }
+    box.parent = frame;
+    box.material = woodMat;
+    box.isPickable = false;
+    box.checkCollisions = false;
+    bars.push(box);
+    return box;
+  };
+
+  // 上下水平条: 宽度=outerW, 位于上/下边缘外(frameW 外伸)，y = ±(height/2 + margin + frameW/2)
+  mkBar(`${frameMesh.name}-frame-top`,    0,  (height / 2 + margin + frameW / 2), hBarLen, frameW, 'h');
+  mkBar(`${frameMesh.name}-frame-bottom`, 0, -(height / 2 + margin + frameW / 2), hBarLen, frameW, 'h');
+  // 左右竖条: 高度=vBarLen, 位于左/右边缘外，x = ±(width/2 + margin + frameW/2)
+  mkBar(`${frameMesh.name}-frame-left`,  -(width / 2 + margin + frameW / 2), 0, vBarLen, frameW, 'v');
+  mkBar(`${frameMesh.name}-frame-right`,   (width / 2 + margin + frameW / 2), 0, vBarLen, frameW, 'v');
+
+  return { frame, bars };
+}

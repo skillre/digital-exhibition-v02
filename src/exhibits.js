@@ -2,7 +2,7 @@
 // 根据 contents.json 在 3D 场景中创建海报、视频、文档展品
 
 import { loadTexture } from './content-loader.js';
-import { createGlowBorder } from './utils.js';
+import { createPictureFrame } from './utils.js';
 
 /**
  * 创建所有展品
@@ -39,7 +39,7 @@ export async function createExhibits(scene, content, hallInfo) {
         mat.emissiveColor = new BABYLON.Color3(0.35, 0.35, 0.40);  // 更亮确保暗环境可见
         mat.environmentIntensity = 0.5;
         board.material = mat;
-        createGlowBorder(scene, board, new BABYLON.Color3(0, 0.5, 1.0));
+        createPictureFrame(scene, board);
         console.log(`[海报] 加载成功: ${item.id}`);
       } catch (e) {
         console.error(`[海报] 加载失败: ${item.id}`, e.message);
@@ -94,7 +94,7 @@ export async function createExhibits(scene, content, hallInfo) {
           mat.emissiveColor = new BABYLON.Color3(0.08, 0.10, 0.20);
           screen.material = mat;
         }
-        createGlowBorder(scene, screen, new BABYLON.Color3(0, 0.5, 1.0));
+        createPictureFrame(scene, screen);
         console.log(`[视频] 封面加载成功: ${item.id}`);
       } catch (e) {
         console.error(`[视频封面] 加载失败: ${item.id}`, e.message);
