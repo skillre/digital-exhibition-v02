@@ -58,7 +58,7 @@ export function setupCamera(scene, canvas, hallInfo) {
 
   // ── 锁定高度 + 射线检测墙体/前台碰撞 ──
   const lockedY = floorY + eyeHeight;
-  const CHECK_DIST = 0.6;  // 前方检测距离
+  const CHECK_DIST = 1.0;  // 前方检测距离
   const lastValidPos = startPos.clone();
 
   // 碰撞过滤器：检测所有可碰撞的静态物体（墙 + 前台）
@@ -70,7 +70,7 @@ export function setupCamera(scene, canvas, hallInfo) {
     // 锁定高度
     camera.position.y = lockedY;
 
-    // 多方向射线检测（前/后/左/右），防止穿过任何物体
+    // 多方向射线检测（8方向：前/后/左/右 + 4对角），防止穿过任何物体
     const dir = new BABYLON.Vector3();
     camera.getDirectionToRef(BABYLON.Vector3.Forward(), dir);
     dir.y = 0; dir.normalize();
@@ -82,12 +82,21 @@ export function setupCamera(scene, canvas, hallInfo) {
     let collided = false;
     const origin = camera.position.clone();
 
-    // 检测4个方向
-    for (const d of [dir, dir.scale(-1), rightDir, rightDir.scale(-1)]) {
+    // 检测8个方向（4主方向 + 4对角）
+    const directions = [
+      dir, dir.scale(-1), rightDir, rightDir.scale(-1),  // 前后左右
+      dir.add(rightDir).normalize(),   // 前右
+      dir.subtract(rightDir).normalize(), // 前左
+      dir.scale(-1).add(rightDir).normalize(), // 后右
+      dir.scale(-1).subtract(rightDir).normalize(), // 后左
+    ];
+
+    for (const d of directions) {
       const ray = new BABYLON.Ray(origin, d, CHECK_DIST);
       const hit = scene.pickWithRay(ray, collisionFilter);
       if (hit.hit) {
         collided = true;
+        console.log(`[碰撞] 命中: ${hit.pickedMesh.name}, 距离: ${hit.distance.toFixed(2)}m`);
         break;
       }
     }
