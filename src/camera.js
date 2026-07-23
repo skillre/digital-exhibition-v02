@@ -20,9 +20,9 @@ export function setupCamera(scene, canvas, hallInfo) {
   // 原始 Z: -4.1 ~ 5.6 → 旋转后 Y: -4.1 ~ 5.6
   //
   // 相机应在房间中心附近
-  const centerX = 2.98;   // 用户定位的初始位置
+  const centerX = 2.27;   // 用户定位的初始位置
   const startZ = -0.05;   // 用户定位的初始位置
-  const startYaw = 90.2;  // 用户定位的初始朝向（度）
+  const startYaw = 90.0;  // 用户定位的初始朝向（度）
 
   let startPos = new BABYLON.Vector3(centerX, floorY + eyeHeight, startZ);
   console.log(`[相机] 起始位置: (${startPos.x.toFixed(2)}, ${startPos.y.toFixed(2)}, ${startPos.z.toFixed(2)})`);
