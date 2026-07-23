@@ -524,7 +524,7 @@ function createDebugAxes(scene, roomMeshes) {
 async function loadReceptionDesk(scene, hallMeshes) {
   const DESK_FILE = 'reception-desk.glb';
   // 用户定位的位置和朝向
-  const DESK_X = 7.08;
+  const DESK_X = 5.88;
   const DESK_Y = 0;      // 地板高度
   const DESK_Z = -0.04;
   const DESK_YAW = 270.2;  // 朝向（度）
@@ -568,13 +568,24 @@ async function loadReceptionDesk(scene, hallMeshes) {
     const TARGET_DESK_SIZE = 2.0;
     if (deskMaxDim > 0) {
       const deskScale = TARGET_DESK_SIZE / deskMaxDim;
-      if (deskScale < 0.1 || deskScale > 10) {
-        console.log(`[前台] 自动缩放: ${deskScale.toFixed(3)}x`);
-        deskRoot.scaling = new BABYLON.Vector3(deskScale, deskScale, deskScale);
-        deskRoot.computeWorldMatrix(true);
-        deskMeshes.forEach(m => m.computeWorldMatrix(true));
-      }
+      // 使用用户调试后的缩放值
+      const USER_SCALE = 0.0061;
+      console.log(`[前台] 使用用户缩放: ${USER_SCALE}x`);
+      deskRoot.scaling = new BABYLON.Vector3(USER_SCALE, USER_SCALE, USER_SCALE);
+      deskRoot.computeWorldMatrix(true);
+      deskMeshes.forEach(m => m.computeWorldMatrix(true));
     }
+
+    // ── 覆盖前台材质颜色 ──
+    // GLB 烘焙材质可能显示为灰色，用 PBR 材质替换
+    const DESK_COLOR = new BABYLON.Color3(0.15, 0.12, 0.10);  // 深棕色，可调整
+    const deskMat = new BABYLON.PBRMaterial('desk-mat', scene);
+    deskMat.albedoColor = DESK_COLOR;
+    deskMat.metallic = 0.3;
+    deskMat.roughness = 0.6;
+    deskMat.environmentIntensity = 0.5;
+    deskMeshes.forEach(m => { m.material = deskMat; });
+    console.log(`[前台] 材质颜色已覆盖: RGB(${DESK_COLOR.r}, ${DESK_COLOR.g}, ${DESK_COLOR.b})`);
 
     // 调试：在前台位置添加标记球
     const marker = BABYLON.MeshBuilder.CreateSphere('desk-marker', { diameter: 0.3 }, scene);
