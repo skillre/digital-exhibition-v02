@@ -46,10 +46,12 @@ index.html, style.css, contents.json
 ```
 
 ## 碰撞系统约定
-- GLB 模型法线异常 → GLB mesh 的 `checkCollisions = false`
-- 改用**不可见代理盒**（法线正确的 BABYLON Box）承载碰撞：墙×4 + 前台全身盒
 - 相机用**原生椭球碰撞**（ellipsoid 覆盖地板→1.7m 全身高度）
+- 外墙 + 前台：用**不可见代理盒**承载碰撞（`createWallColliders` 4面墙盒 + `desk-collider` 全身盒）；这些 GLB mesh 自身 `checkCollisions=false`
+- 室内内侧建筑骨架（墙/框架/隔断等复杂几何，代理盒无法贴合）：直接开启对应 GLB mesh 的 `checkCollisions=true`（见 hall.js 的 `COLLISION_MESH_PREFIXES` 白名单：`wall`/`frame`/`house_dec`）
+- 装饰物（画/地板/植物/灯光/地毯/座椅/花瓶）保持 `checkCollisions=false`，不参与碰撞
 - 历史教训：眼高水平射线会从矮物体顶部飞过 → 已弃用，勿再用射线方案防穿越
+- 若某白名单 mesh 法线异常导致椭球卡顿，从 `COLLISION_MESH_PREFIXES` 移除该前缀即可（可逆）
 
 ## Git 提交约定
 - 中文提交信息，`类型: 说明` 格式（feat/fix/revert/docs）

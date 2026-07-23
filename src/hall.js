@@ -111,14 +111,28 @@ export async function createHall(scene) {
 
   const roomMeshes = [];
 
+  // ── 建筑骨架碰撞白名单 ──
+  // 外墙/前台仍由不可见代理盒挡(createWallColliders / desk-collider)。
+  // 但室内还有内墙/框架/隔断等承重结构，代理盒无法贴合复杂几何(L形墙/框架会堵通道)，
+  // 故对这些 mesh 直接开启 checkCollisions，配合椭球阻挡穿越。
+  // 故意排除: floor(贴地无效)/pic*(画)/rocks·tree·leaves(室外)·spot·lighting·carpet·seat·vase。
+  // 若某前缀的 mesh 法线异常导致椭球卡顿，从此处移除即可(可逆)。
+  const COLLISION_MESH_PREFIXES = ['wall', 'frame', 'house_dec'];
+
   for (const mesh of result.meshes) {
     // 跳过 __root__ TransformNode
     if (mesh.name === '__root__') continue;
 
-    // GLB 法线错误会导致椭球碰撞卡顿 → 关闭GLB碰撞，改用不可见代理盒
-    mesh.checkCollisions = false;
+    // ── 碰撞开关 ──
+    // 默认 false(历史教训: GLB 法线异常曾致椭球卡顿,故装饰物保持关闭)。
+    // 仅对建筑骨架白名单开启,挡住内墙/框架/装饰隔断。
+    const enableCollision = COLLISION_MESH_PREFIXES.some(p => mesh.name.startsWith(p));
+    mesh.checkCollisions = enableCollision;
     mesh.isPickable = false;
     mesh.receiveShadows = true;
+    if (enableCollision) {
+      console.log(`[碰撞] 开启 GLB 碰撞: ${mesh.name}`);
+    }
 
     // 重新挂载到 roomRoot
     mesh.parent = roomRoot;
