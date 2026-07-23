@@ -524,10 +524,10 @@ function createDebugAxes(scene, roomMeshes) {
 async function loadReceptionDesk(scene, hallMeshes) {
   const DESK_FILE = 'reception-desk.glb';
   // 用户定位的位置和朝向
-  const DESK_X = 9.29;
+  const DESK_X = 7.08;
   const DESK_Y = 0;      // 地板高度
-  const DESK_Z = -0.06;
-  const DESK_YAW = -90.2;  // 朝向（度）
+  const DESK_Z = -0.04;
+  const DESK_YAW = 270.2;  // 朝向（度）
 
   console.log('[前台] 开始加载前台模型...');
   try {
